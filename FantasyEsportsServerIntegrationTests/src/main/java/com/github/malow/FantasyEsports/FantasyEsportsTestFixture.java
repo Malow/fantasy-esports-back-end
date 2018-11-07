@@ -1,13 +1,26 @@
 package com.github.malow.FantasyEsports;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import org.apache.http.impl.client.HttpClients;
 import org.junit.Before;
+import org.slf4j.LoggerFactory;
 
+import com.github.malow.malowlib.MaloWLogger;
+import com.mashape.unirest.http.Unirest;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 
 public class FantasyEsportsTestFixture
 {
@@ -37,8 +50,49 @@ public class FantasyEsportsTestFixture
     this.preRegisterAccounts();
   }
 
-  private static final String URL = "mongodb+srv://admin:asdf@cluster0-u4tzo.mongodb.net/test?retryWrites=true";
-  public static MongoClient mongo = new MongoClient(new MongoClientURI(URL));
+  static
+  {
+    ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.mongodb.driver").setLevel(Level.ERROR);
+    ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.apache.http").setLevel(Level.ERROR);
+
+    try
+    {
+      SSLContext sc = SSLContext.getInstance("SSL");
+      sc.init(null, new TrustManager[] { new X509TrustManager()
+      {
+        @Override
+        public X509Certificate[] getAcceptedIssuers()
+        {
+          return new X509Certificate[0];
+        }
+
+        @Override
+        public void checkClientTrusted(X509Certificate[] certs, String authType)
+        {
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] certs, String authType)
+        {
+        }
+      } }, new SecureRandom());
+      Unirest.setHttpClient(HttpClients.custom().setSSLContext(sc).setSSLHostnameVerifier(new HostnameVerifier()
+      {
+        @Override
+        public boolean verify(String hostname, SSLSession session)
+        {
+          return true;
+        }
+      }).build());
+    }
+    catch (Exception e)
+    {
+      MaloWLogger.error("Error intializing Unirest https accept all", e);
+    }
+  }
+
+  private static final String MONGODB_URL = "mongodb+srv://admin:asdf@cluster0-u4tzo.mongodb.net/test?retryWrites=true";
+  public static MongoClient mongo = new MongoClient(new MongoClientURI(MONGODB_URL));
   public static MongoDatabase database = mongo.getDatabase("FantasyEsports");
 
   private void resetDatabase() throws Exception
@@ -49,14 +103,7 @@ public class FantasyEsportsTestFixture
 
   private void preRegisterAccounts() throws Exception
   {
-    String response = ServerConnection.register(PRE_REGISTERED_USER1);
-    Matcher matcher = Pattern.compile("\\{\"sessionKey\":\"([0-9a-f-]+)\"\\}").matcher(response);
-    matcher.find();
-    PRE_REGISTERED_USER1.sessionKey = matcher.group(1);
-
-    response = ServerConnection.register(PRE_REGISTERED_USER2);
-    matcher = Pattern.compile("\\{\"sessionKey\":\"([0-9a-f-]+)\"\\}").matcher(response);
-    matcher.find();
-    PRE_REGISTERED_USER2.sessionKey = matcher.group(1);
+    PRE_REGISTERED_USER1.sessionKey = ConvenienceMethods.register(PRE_REGISTERED_USER1);
+    PRE_REGISTERED_USER2.sessionKey = ConvenienceMethods.register(PRE_REGISTERED_USER2);
   }
 }

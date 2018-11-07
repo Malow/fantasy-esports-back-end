@@ -1,10 +1,12 @@
 package com.github.malow.FantasyEsports.services.league;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,6 +17,7 @@ import com.github.malow.FantasyEsports.services.account.Account;
 import com.github.malow.FantasyEsports.services.account.AccountService;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.CreateNameTakenException;
+import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.malowlib.GsonSingleton;
 
 @CrossOrigin(maxAge = 3600)
@@ -33,6 +36,17 @@ public class LeagueController extends Controller
     return GsonSingleton.toJson(leagues);
   }
 
+  @GetMapping(value = { "/league/{id}" })
+  public String getLeague(@PathVariable String id)
+  {
+    Optional<League> league = this.leagueRepository.findById(id);
+    if (league.isPresent())
+    {
+      return GsonSingleton.toJson(league.get());
+    }
+    throw new NoLeagueFoundException();
+  }
+
   @PostMapping(value = { "/league" })
   public void createLeague(@RequestBody String payload, @RequestHeader(value = "Session-Key") String sessionKey)
   {
@@ -42,7 +56,7 @@ public class LeagueController extends Controller
     {
       throw new CreateNameTakenException();
     }
-    League league = new League(request.name, account.getDisplayName());
+    League league = new League(request.name, account.getDisplayName(), request.startDate, request.endDate);
     this.leagueRepository.insert(league);
   }
 }

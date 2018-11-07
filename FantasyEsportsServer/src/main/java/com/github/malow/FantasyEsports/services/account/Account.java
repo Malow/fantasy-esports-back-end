@@ -19,6 +19,16 @@ public class Account
     this.password = password;
   }
 
+  public String getEmail()
+  {
+    return this.email;
+  }
+
+  public String getDisplayName()
+  {
+    return this.displayName;
+  }
+
   public String getPassword()
   {
     return this.password;
@@ -32,10 +42,5 @@ public class Account
   public String getSessionKey()
   {
     return this.sessionKey;
-  }
-
-  public String getDisplayName()
-  {
-    return this.displayName;
   }
 }
