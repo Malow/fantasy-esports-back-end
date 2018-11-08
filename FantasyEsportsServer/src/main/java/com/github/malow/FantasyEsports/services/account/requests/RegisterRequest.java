@@ -1,11 +1,14 @@
 package com.github.malow.FantasyEsports.services.account.requests;
 
-import com.github.malow.malowlib.network.https.HttpRequest;
+import com.github.malow.FantasyEsports.services.Request;
 
-public class RegisterRequest implements HttpRequest
+public class RegisterRequest extends Request
 {
+  @Mandatory
   public String email;
+  @Mandatory
   public String displayName;
+  @Mandatory
   public String password;
 
   public RegisterRequest(String email, String displayName, String password)
@@ -13,24 +16,5 @@ public class RegisterRequest implements HttpRequest
     this.email = email;
     this.displayName = displayName;
     this.password = password;
-  }
-
-  @Override
-  public boolean isValid()
-  {
-    if (this.email == null || this.email.isEmpty())
-    {
-      return false;
-    }
-    if (this.displayName == null || this.displayName.isEmpty())
-    {
-      return false;
-    }
-    if (this.password == null || this.password.isEmpty())
-    {
-      return false;
-    }
-
-    return true;
   }
 }

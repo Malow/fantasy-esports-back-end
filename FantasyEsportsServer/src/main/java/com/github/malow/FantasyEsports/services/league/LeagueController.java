@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.malow.FantasyEsports.services.Controller;
+import com.github.malow.FantasyEsports.services.HttpResponseException;
 import com.github.malow.FantasyEsports.services.account.Account;
 import com.github.malow.FantasyEsports.services.account.AccountService;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
-import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.CreateNameTakenException;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.malowlib.GsonSingleton;
 
@@ -28,35 +29,47 @@ public class LeagueController extends Controller
   private LeagueRepository leagueRepository;
   @Autowired
   private AccountService accountService;
+  @Autowired
+  private LeagueService leagueService;
 
   @GetMapping(value = { "/league" })
-  public String listLeagues()
+  public ResponseEntity<String> listLeagues()
   {
     List<League> leagues = this.leagueRepository.findAll();
-    return GsonSingleton.toJson(leagues);
+    return ResponseEntity.ok(GsonSingleton.toJson(leagues));
   }
 
   @GetMapping(value = { "/league/{id}" })
-  public String getLeague(@PathVariable String id)
+  public ResponseEntity<String> getLeague(@PathVariable String id)
   {
-    Optional<League> league = this.leagueRepository.findById(id);
-    if (league.isPresent())
+    try
     {
-      return GsonSingleton.toJson(league.get());
+      Optional<League> league = this.leagueRepository.findById(id);
+      if (league.isPresent())
+      {
+        return ResponseEntity.ok(GsonSingleton.toJson(league.get()));
+      }
+      throw new NoLeagueFoundException();
     }
-    throw new NoLeagueFoundException();
+    catch (HttpResponseException e)
+    {
+      return this.handleHttpResponseException(e);
+    }
   }
 
   @PostMapping(value = { "/league" })
-  public void createLeague(@RequestBody String payload, @RequestHeader(value = "Session-Key") String sessionKey)
+  public ResponseEntity<String> createLeague(@RequestBody String payload, @RequestHeader(value = "Session-Key", required = false) String sessionKey)
   {
-    Account account = this.accountService.authorize(sessionKey);
-    CreateLeagueRequest request = this.getValidRequest(payload, CreateLeagueRequest.class);
-    if (this.leagueRepository.findByName(request.name) != null)
+    try
     {
-      throw new CreateNameTakenException();
+      Account account = this.accountService.authorize(sessionKey);
+      CreateLeagueRequest request = this.getValidRequest(payload, CreateLeagueRequest.class);
+      this.leagueService.createLeague(request, account);
+      return ResponseEntity.ok("");
     }
-    League league = new League(request.name, account.getDisplayName(), request.startDate, request.endDate);
-    this.leagueRepository.insert(league);
+    catch (HttpResponseException e)
+    {
+      return this.handleHttpResponseException(e);
+    }
   }
 }

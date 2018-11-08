@@ -43,4 +43,19 @@ public class Account
   {
     return this.sessionKey;
   }
+
+  public void setPassword(String password)
+  {
+    this.password = password;
+  }
+
+  public void setDisplayName(String displayName)
+  {
+    this.displayName = displayName;
+  }
+
+  public void setEmail(String email)
+  {
+    this.email = email;
+  }
 }

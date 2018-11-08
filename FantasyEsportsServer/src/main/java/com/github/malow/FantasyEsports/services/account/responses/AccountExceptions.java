@@ -1,31 +1,41 @@
 package com.github.malow.FantasyEsports.services.account.responses;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.github.malow.FantasyEsports.services.ErrorCode;
+import com.github.malow.FantasyEsports.services.HttpResponseException;
 
 public class AccountExceptions
 {
-  @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Email is already taken")
-  public static class RegisterEmailTakenException extends RuntimeException
+  public static class EmailTakenException extends HttpResponseException
   {
-    private static final long serialVersionUID = -124610181451124151L;
+    public EmailTakenException()
+    {
+      super(HttpStatus.BAD_REQUEST, ErrorCode.EMAIL_EXISTS, "Email is already taken");
+    }
   }
 
-  @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "DisplayName is already taken")
-  public static class RegisterDisplayNameTakenException extends RuntimeException
+  public static class DisplayNameTakenException extends HttpResponseException
   {
-    private static final long serialVersionUID = 2692392566907588868L;
+    public DisplayNameTakenException()
+    {
+      super(HttpStatus.BAD_REQUEST, ErrorCode.DISPLAY_NAME_EXISTS, "DisplayName is already taken");
+    }
   }
 
-  @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "No account for that email exists")
-  public static class LoginEmailNotRegisteredException extends RuntimeException
+  public static class EmailNotRegisteredException extends HttpResponseException
   {
-    private static final long serialVersionUID = -1844662937870957018L;
+    public EmailNotRegisteredException()
+    {
+      super(HttpStatus.BAD_REQUEST, ErrorCode.USER_DOES_NOT_EXIST, "No account for that email exists");
+    }
   }
 
-  @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Wrong password")
-  public static class LoginWrongPasswordException extends RuntimeException
+  public static class WrongPasswordException extends HttpResponseException
   {
-    private static final long serialVersionUID = 7446386946216802574L;
+    public WrongPasswordException()
+    {
+      super(HttpStatus.BAD_REQUEST, ErrorCode.PASSWORD_INCORRECT, "Wrong password");
+    }
   }
 }

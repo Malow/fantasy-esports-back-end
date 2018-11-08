@@ -2,12 +2,15 @@ package com.github.malow.FantasyEsports.services.league.requests;
 
 import java.time.ZonedDateTime;
 
-import com.github.malow.malowlib.network.https.HttpRequest;
+import com.github.malow.FantasyEsports.services.Request;
 
-public class CreateLeagueRequest implements HttpRequest
+public class CreateLeagueRequest extends Request
 {
+  @Mandatory
   public String name;
+  @Mandatory
   public ZonedDateTime startDate;
+  @Mandatory
   public ZonedDateTime endDate;
 
   public CreateLeagueRequest(String name, ZonedDateTime startDate, ZonedDateTime endDate)
@@ -15,26 +18,5 @@ public class CreateLeagueRequest implements HttpRequest
     this.name = name;
     this.startDate = startDate;
     this.endDate = endDate;
-  }
-
-  @Override
-  public boolean isValid()
-  {
-    if (this.name == null || this.name.isEmpty())
-    {
-      return false;
-    }
-
-    if (this.startDate == null)
-    {
-      return false;
-    }
-
-    if (this.endDate == null)
-    {
-      return false;
-    }
-
-    return true;
   }
 }

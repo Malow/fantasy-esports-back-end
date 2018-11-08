@@ -9,14 +9,17 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import com.github.malow.FantasyEsports.Config;
 import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
+import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
 import com.github.malow.FantasyEsports.services.league.League;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
+import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.CreateNameTakenException;
+import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.malowlib.GsonSingleton;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
-import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.HttpResponse;
 
 public class LeagueTests extends FantasyEsportsTestFixture
 {
@@ -26,46 +29,43 @@ public class LeagueTests extends FantasyEsportsTestFixture
   @Test
   public void testCreateLeagueSuccessfully() throws Exception
   {
-    String responseBody = Unirest.post(Config.HOST + "/league").header("Session-Key", PRE_REGISTERED_USER1.sessionKey)
-        .body(GsonSingleton.toJson(new CreateLeagueRequest("test123", this.startDate, this.endDate))).asJson()
-        .getBody().toString();
+    CreateLeagueRequest request = new CreateLeagueRequest("test123", this.startDate, this.endDate);
 
-    assertThat(responseBody).isEqualTo("{}");
+    HttpResponse<String> response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+
+    assertThat(response.getStatus()).isEqualTo(200);
+    assertThat(response.getBody().toString()).isEqualTo("");
   }
 
   @Test
   public void testCreateLeagueWithoutSession() throws Exception
   {
-    String responseBody = Unirest.post(Config.HOST + "/league")
-        .body(GsonSingleton.toJson(new CreateLeagueRequest("test123", this.startDate, this.endDate))).asJson()
-        .getBody().toString();
+    CreateLeagueRequest request = new CreateLeagueRequest("test123", this.startDate, this.endDate);
 
-    assertThat(responseBody).contains("Missing request header 'Session-Key'");
-    assertThat(responseBody).contains("\"status\":400");
+    HttpResponse<String> response = this.makePostRequest("/league", request);
+
+    this.assertThatResponseEqualsException(response, new UnauthorizedException());
   }
 
   @Test
   public void testCreateLeagueWithBadSession() throws Exception
   {
-    String responseBody = Unirest.post(Config.HOST + "/league").header("Session-Key", "badSession")
-        .body(GsonSingleton.toJson(new CreateLeagueRequest("test123", this.startDate, this.endDate))).asJson()
-        .getBody().toString();
+    CreateLeagueRequest request = new CreateLeagueRequest("test123", this.startDate, this.endDate);
 
-    assertThat(responseBody).contains("You do not have permission to do that");
-    assertThat(responseBody).contains("\"status\":401");
+    HttpResponse<String> response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", "badSession"));
+
+    this.assertThatResponseEqualsException(response, new UnauthorizedException());
   }
 
   @Test
   public void testCreateLeagueWithSameName() throws Exception
   {
     ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
+    CreateLeagueRequest request = new CreateLeagueRequest("test123", this.startDate, this.endDate);
 
-    String responseBody = Unirest.post(Config.HOST + "/league").header("Session-Key", PRE_REGISTERED_USER1.sessionKey)
-        .body(GsonSingleton.toJson(new CreateLeagueRequest("test123", this.startDate, this.endDate))).asJson()
-        .getBody().toString();
+    HttpResponse<String> response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
-    assertThat(responseBody).contains("Name is already taken");
-    assertThat(responseBody).contains("\"status\":400");
+    this.assertThatResponseEqualsException(response, new CreateNameTakenException());
   }
 
   @Test
@@ -74,9 +74,10 @@ public class LeagueTests extends FantasyEsportsTestFixture
     ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
     ConvenienceMethods.createLeague("test124", PRE_REGISTERED_USER1.sessionKey);
 
-    String responseBody = Unirest.get(Config.HOST + "/league").asJson().getBody().toString();
+    HttpResponse<String> response = this.makeGetRequest("/league");
 
-    List<League> leagues = GsonSingleton.fromJson(responseBody, new TypeToken<ArrayList<League>>()
+    assertThat(response.getStatus()).isEqualTo(200);
+    List<League> leagues = GsonSingleton.fromJson(response.getBody().toString(), new TypeToken<ArrayList<League>>()
     {
     }.getType());
     assertThat(leagues.stream().map(League::getName).collect(Collectors.toList())).containsExactlyInAnyOrder("test123", "test124");
@@ -88,9 +89,10 @@ public class LeagueTests extends FantasyEsportsTestFixture
     ConvenienceMethods.createLeague("test123", this.startDate, this.endDate, PRE_REGISTERED_USER1.sessionKey);
     List<League> leagues = ConvenienceMethods.getLeagues();
 
-    String responseBody = Unirest.get(Config.HOST + "/league/" + leagues.get(0).getId()).asJson().getBody().toString();
+    HttpResponse<String> response = this.makeGetRequest("/league/" + leagues.get(0).getId());
 
-    League league = GsonSingleton.fromJson(responseBody, League.class);
+    assertThat(response.getStatus()).isEqualTo(200);
+    League league = GsonSingleton.fromJson(response.getBody().toString(), League.class);
     assertThat(league.getName()).isEqualTo("test123");
     assertThat(league.getOwnerDisplayName()).isEqualTo(PRE_REGISTERED_USER1.displayName);
     assertThat(league.getStartDate()).isEqualTo(this.startDate);
@@ -100,9 +102,8 @@ public class LeagueTests extends FantasyEsportsTestFixture
   @Test
   public void testGetLeagueNoLeagueFound() throws Exception
   {
-    String responseBody = Unirest.get(Config.HOST + "/league/" + "badLeagueId").asJson().getBody().toString();
+    HttpResponse<String> response = this.makeGetRequest("/league/" + "badLeagueId");
 
-    assertThat(responseBody).contains("No league found");
-    assertThat(responseBody).contains("\"status\":404");
+    this.assertThatResponseEqualsException(response, new NoLeagueFoundException());
   }
 }

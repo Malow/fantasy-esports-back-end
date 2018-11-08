@@ -1,18 +1,26 @@
 package com.github.malow.FantasyEsports.services;
 
-import com.github.malow.FantasyEsports.services.GeneralExceptions.BadRequestException;
+import org.springframework.http.ResponseEntity;
+
+import com.github.malow.FantasyEsports.services.HttpResponseException.BadJsonRequestException;
+import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.malowlib.GsonSingleton;
-import com.github.malow.malowlib.network.https.HttpRequest;
 
 public abstract class Controller
 {
-  protected <T extends HttpRequest> T getValidRequest(String body, Class<T> requestClass)
+  protected <T extends Request> T getValidRequest(String body, Class<T> requestClass) throws BadJsonRequestException, MissingMandatoryFieldException
   {
     T request = GsonSingleton.fromJson(body, requestClass);
-    if (request == null || !request.isValid())
+    if (request == null)
     {
-      throw new BadRequestException();
+      throw new BadJsonRequestException();
     }
+    request.validate();
     return request;
+  }
+
+  protected ResponseEntity<String> handleHttpResponseException(HttpResponseException e)
+  {
+    return ResponseEntity.status(e.getHttpStatus()).body(e.getJsonData());
   }
 }

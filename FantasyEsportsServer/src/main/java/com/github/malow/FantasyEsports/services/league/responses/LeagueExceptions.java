@@ -1,19 +1,25 @@
 package com.github.malow.FantasyEsports.services.league.responses;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.github.malow.FantasyEsports.services.ErrorCode;
+import com.github.malow.FantasyEsports.services.HttpResponseException;
 
 public class LeagueExceptions
 {
-  @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Name is already taken")
-  public static class CreateNameTakenException extends RuntimeException
+  public static class CreateNameTakenException extends HttpResponseException
   {
-    private static final long serialVersionUID = 4636121792292443012L;
+    public CreateNameTakenException()
+    {
+      super(HttpStatus.BAD_REQUEST, ErrorCode.LEAGUE_NAME_EXISTS, "Name is already taken");
+    }
   }
 
-  @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "No league found")
-  public static class NoLeagueFoundException extends RuntimeException
+  public static class NoLeagueFoundException extends HttpResponseException
   {
-    private static final long serialVersionUID = 6285286746483259058L;
+    public NoLeagueFoundException()
+    {
+      super(HttpStatus.NOT_FOUND, ErrorCode.LEAGUE_DOES_NOT_EXIST, "No league found");
+    }
   }
 }

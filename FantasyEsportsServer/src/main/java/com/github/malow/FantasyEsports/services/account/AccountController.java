@@ -1,67 +1,88 @@
 package com.github.malow.FantasyEsports.services.account;
 
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.malow.FantasyEsports.services.Controller;
+import com.github.malow.FantasyEsports.services.HttpResponseException;
 import com.github.malow.FantasyEsports.services.account.requests.LoginRequest;
+import com.github.malow.FantasyEsports.services.account.requests.ModifyAccountRequest;
 import com.github.malow.FantasyEsports.services.account.requests.RegisterRequest;
-import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.LoginEmailNotRegisteredException;
-import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.LoginWrongPasswordException;
-import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.RegisterDisplayNameTakenException;
-import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.RegisterEmailTakenException;
+import com.github.malow.FantasyEsports.services.account.responses.GetOwnAccountResponse;
 import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
+import com.github.malow.malowlib.GsonSingleton;
 
 @CrossOrigin(maxAge = 3600)
 @RestController
 public class AccountController extends Controller
 {
   @Autowired
-  private AccountRepository repository;
+  private AccountService accountService;
 
   @PostMapping(value = { "/account/register" })
-  public LoginResponse register(@RequestBody String payload)
+  public ResponseEntity<String> register(@RequestBody String payload)
   {
-    RegisterRequest request = this.getValidRequest(payload, RegisterRequest.class);
-    if (this.repository.findByEmail(request.email) != null)
+    try
     {
-      throw new RegisterEmailTakenException();
+      RegisterRequest request = this.getValidRequest(payload, RegisterRequest.class);
+      LoginResponse response = this.accountService.register(request);
+      return ResponseEntity.ok(GsonSingleton.toJson(response));
     }
-    if (this.repository.findByDisplayName(request.displayName) != null)
+    catch (HttpResponseException e)
     {
-      throw new RegisterDisplayNameTakenException();
+      return this.handleHttpResponseException(e);
     }
-    Account account = new Account(request.email, request.displayName, PasswordHandler.hashPassword(request.password));
-    String sessionKey = UUID.randomUUID().toString();
-    account.setSessionKey(sessionKey);
-    this.repository.insert(account);
-    return new LoginResponse(sessionKey);
   }
 
   @PostMapping(value = { "/account/login" })
-  public LoginResponse login(@RequestBody String payload)
+  public ResponseEntity<String> login(@RequestBody String payload)
   {
-    LoginRequest request = this.getValidRequest(payload, LoginRequest.class);
-    Account account = this.repository.findByEmail(request.email);
-    if (account == null)
+    try
     {
-      throw new LoginEmailNotRegisteredException();
+      LoginRequest request = this.getValidRequest(payload, LoginRequest.class);
+      LoginResponse response = this.accountService.login(request);
+      return ResponseEntity.ok(GsonSingleton.toJson(response));
     }
-    if (PasswordHandler.checkPassword(request.password, account.getPassword()))
+    catch (HttpResponseException e)
     {
-      String sessionKey = UUID.randomUUID().toString();
-      account.setSessionKey(sessionKey);
-      this.repository.save(account);
-      return new LoginResponse(sessionKey);
+      return this.handleHttpResponseException(e);
     }
-    else
+  }
+
+  @GetMapping(value = { "/account" })
+  public ResponseEntity<String> getOwnAccount(@RequestHeader(value = "Session-Key", required = false) String sessionKey)
+  {
+    try
     {
-      throw new LoginWrongPasswordException();
+      Account account = this.accountService.authorize(sessionKey);
+      return ResponseEntity.ok(GsonSingleton.toJson(new GetOwnAccountResponse(account)));
+    }
+    catch (HttpResponseException e)
+    {
+      return this.handleHttpResponseException(e);
+    }
+  }
+
+  @PatchMapping(value = { "/account" })
+  public ResponseEntity<String> modifyAccount(@RequestBody String payload, @RequestHeader(value = "Session-Key", required = false) String sessionKey)
+  {
+    try
+    {
+      Account account = this.accountService.authorize(sessionKey);
+      ModifyAccountRequest request = this.getValidRequest(payload, ModifyAccountRequest.class);
+      this.accountService.modifyAccount(request, account);
+      return ResponseEntity.ok("");
+    }
+    catch (HttpResponseException e)
+    {
+      return this.handleHttpResponseException(e);
     }
   }
 }
