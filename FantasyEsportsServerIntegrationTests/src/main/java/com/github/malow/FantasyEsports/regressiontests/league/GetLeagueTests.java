@@ -1,4 +1,4 @@
-package com.github.malow.FantasyEsports.regressiontests;
+package com.github.malow.FantasyEsports.regressiontests.league;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,62 +11,16 @@ import org.junit.Test;
 
 import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
-import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
 import com.github.malow.FantasyEsports.services.league.League;
-import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
-import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.CreateNameTakenException;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.malowlib.GsonSingleton;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 import com.mashape.unirest.http.HttpResponse;
 
-public class LeagueTests extends FantasyEsportsTestFixture
+public class GetLeagueTests extends FantasyEsportsTestFixture
 {
   final ZonedDateTime startDate = ZonedDateTime.now().plusHours(1);
   final ZonedDateTime endDate = ZonedDateTime.now().plusMonths(1);
-
-  @Test
-  public void testCreateLeagueSuccessfully() throws Exception
-  {
-    CreateLeagueRequest request = new CreateLeagueRequest("test123", this.startDate, this.endDate);
-
-    HttpResponse<String> response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
-
-    assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(response.getBody().toString()).isEqualTo("");
-  }
-
-  @Test
-  public void testCreateLeagueWithoutSession() throws Exception
-  {
-    CreateLeagueRequest request = new CreateLeagueRequest("test123", this.startDate, this.endDate);
-
-    HttpResponse<String> response = this.makePostRequest("/league", request);
-
-    this.assertThatResponseEqualsException(response, new UnauthorizedException());
-  }
-
-  @Test
-  public void testCreateLeagueWithBadSession() throws Exception
-  {
-    CreateLeagueRequest request = new CreateLeagueRequest("test123", this.startDate, this.endDate);
-
-    HttpResponse<String> response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", "badSession"));
-
-    this.assertThatResponseEqualsException(response, new UnauthorizedException());
-  }
-
-  @Test
-  public void testCreateLeagueWithSameName() throws Exception
-  {
-    ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
-    CreateLeagueRequest request = new CreateLeagueRequest("test123", this.startDate, this.endDate);
-
-    HttpResponse<String> response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
-
-    this.assertThatResponseEqualsException(response, new CreateNameTakenException());
-  }
 
   @Test
   public void testGetLeaguesSucessful() throws Exception

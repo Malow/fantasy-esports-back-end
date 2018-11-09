@@ -99,9 +99,9 @@ public class FantasyEsportsTestFixture
     }
   }
 
-  private static final String MONGODB_URL = "mongodb+srv://admin:asdf@cluster0-u4tzo.mongodb.net/test?retryWrites=true";
+  private static final String MONGODB_URL = "mongodb+srv://admin:asdf@cluster0-u4tzo.mongodb.net/?retryWrites=true";
   public static MongoClient mongo = new MongoClient(new MongoClientURI(MONGODB_URL));
-  public static MongoDatabase database = mongo.getDatabase("FantasyEsports");
+  public static MongoDatabase database = mongo.getDatabase("FantasyEsportsDevelop");
 
   private void resetDatabase() throws Exception
   {

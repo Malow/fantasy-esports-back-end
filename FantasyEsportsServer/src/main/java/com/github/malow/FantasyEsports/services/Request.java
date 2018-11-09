@@ -23,7 +23,7 @@ public abstract class Request
   public void validate() throws MissingMandatoryFieldException
   {
     List<Field> fields = Arrays.asList(this.getClass().getFields());
-    fields = fields.stream().filter(f -> !f.isAnnotationPresent(Mandatory.class)).collect(Collectors.toList());
+    fields = fields.stream().filter(f -> f.isAnnotationPresent(Mandatory.class)).collect(Collectors.toList());
     for (Field field : fields)
     {
       try
@@ -33,6 +33,10 @@ public abstract class Request
         {
           throw new MissingMandatoryFieldException(field.getName());
         }
+      }
+      catch (MissingMandatoryFieldException e)
+      {
+        throw e;
       }
       catch (Exception e)
       {

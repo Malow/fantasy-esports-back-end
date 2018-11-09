@@ -37,6 +37,16 @@
 	  		<artifactId>MaloWLibJava</artifactId>
 	  		<version>1.0</version>
 	  	</dependency>
+	  	<dependency>
+	    	<groupId>com.google.guava</groupId>
+	    	<artifactId>guava</artifactId>
+	    	<version>19.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.zalando</groupId>
+		    <artifactId>logbook-spring-boot-starter</artifactId>
+		    <version>1.5.0</version>
+		</dependency>
     </dependencies>
 
     <properties>
