@@ -9,6 +9,8 @@ import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.account.requests.RegisterRequest;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.DisplayNameTakenException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.EmailTakenException;
+import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
+import com.github.malow.malowlib.GsonSingleton;
 import com.mashape.unirest.http.HttpResponse;
 
 public class RegisterTests extends FantasyEsportsTestFixture
@@ -18,10 +20,12 @@ public class RegisterTests extends FantasyEsportsTestFixture
   {
     RegisterRequest request = new RegisterRequest("tester123@test.com", "tester123", "tester123pw");
 
-    HttpResponse<String> response = this.makePostRequest("/account/register", request);
+    HttpResponse<String> httpResponse = this.makePostRequest("/account/register", request);
 
-    assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(response.getBody().toString()).containsPattern("\\{\"sessionKey\":\"([0-9a-f-]+)\"\\}");
+    assertThat(httpResponse.getStatus()).isEqualTo(200);
+    LoginResponse response = GsonSingleton.fromJson(httpResponse.getBody().toString(), LoginResponse.class);
+    assertThat(response.sessionKey).matches("[0-9a-f-]+");
+    assertThat(response.accountId).matches("[0-9a-f-]+");
   }
 
   @Test
@@ -46,7 +50,7 @@ public class RegisterTests extends FantasyEsportsTestFixture
   @Test
   public void testEmailInUse() throws Exception
   {
-    ConvenienceMethods.register(new TestUser("tester123@test.com", "tester123", "tester123pw", null));
+    ConvenienceMethods.register(new TestUser("tester123@test.com", "tester123", "tester123pw"));
     RegisterRequest request = new RegisterRequest("tester123@test.com", "tester123", "tester123pw");
 
     HttpResponse<String> response = this.makePostRequest("/account/register", request);
@@ -57,7 +61,7 @@ public class RegisterTests extends FantasyEsportsTestFixture
   @Test
   public void testDisplayNameInUse() throws Exception
   {
-    ConvenienceMethods.register(new TestUser("tester123@test.com", "tester123", "tester123pw", null));
+    ConvenienceMethods.register(new TestUser("tester123@test.com", "tester123", "tester123pw"));
     RegisterRequest request = new RegisterRequest("tester124@test.com", "tester123", "tester123pw");
 
     HttpResponse<String> response = this.makePostRequest("/account/register", request);

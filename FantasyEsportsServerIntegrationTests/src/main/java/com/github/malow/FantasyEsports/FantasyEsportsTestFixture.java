@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.malow.FantasyEsports.services.HttpResponseException;
 import com.github.malow.FantasyEsports.services.Request;
+import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
 import com.github.malow.malowlib.GsonSingleton;
 import com.github.malow.malowlib.MaloWLogger;
 import com.mashape.unirest.http.HttpResponse;
@@ -38,18 +39,19 @@ public class FantasyEsportsTestFixture
     public String displayName;
     public String password;
     public String sessionKey;
+    public String accountId;
 
-    public TestUser(String email, String displayName, String password, String sessionKey)
+    public TestUser(String email, String displayName, String password)
     {
       this.email = email;
       this.displayName = displayName;
       this.password = password;
-      this.sessionKey = sessionKey;
     }
   }
 
-  public static final TestUser PRE_REGISTERED_USER1 = new TestUser("tester1@test.com", "tester1", "testerpw", null);
-  public static final TestUser PRE_REGISTERED_USER2 = new TestUser("tester2@test.com", "tester2", "testerpw", null);
+  public static final TestUser PRE_REGISTERED_USER1 = new TestUser("tester1@test.com", "tester1", "testerpw");
+  public static final TestUser PRE_REGISTERED_USER2 = new TestUser("tester2@test.com", "tester2", "testerpw");
+  public static final TestUser PRE_REGISTERED_USER3 = new TestUser("tester3@test.com", "tester3", "testerpw");
 
   @Before
   public void beforeTest() throws Exception
@@ -111,8 +113,15 @@ public class FantasyEsportsTestFixture
 
   private void preRegisterAccounts() throws Exception
   {
-    PRE_REGISTERED_USER1.sessionKey = ConvenienceMethods.register(PRE_REGISTERED_USER1);
-    PRE_REGISTERED_USER2.sessionKey = ConvenienceMethods.register(PRE_REGISTERED_USER2);
+    LoginResponse response = ConvenienceMethods.register(PRE_REGISTERED_USER1);
+    PRE_REGISTERED_USER1.sessionKey = response.sessionKey;
+    PRE_REGISTERED_USER1.accountId = response.accountId;
+    response = ConvenienceMethods.register(PRE_REGISTERED_USER2);
+    PRE_REGISTERED_USER2.sessionKey = response.sessionKey;
+    PRE_REGISTERED_USER2.accountId = response.accountId;
+    response = ConvenienceMethods.register(PRE_REGISTERED_USER3);
+    PRE_REGISTERED_USER3.sessionKey = response.sessionKey;
+    PRE_REGISTERED_USER3.accountId = response.accountId;
   }
 
   protected HttpResponse<String> makePatchRequest(String subPath, Request request) throws UnirestException

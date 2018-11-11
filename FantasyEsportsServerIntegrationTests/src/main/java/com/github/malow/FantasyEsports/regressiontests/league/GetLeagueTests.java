@@ -23,7 +23,7 @@ public class GetLeagueTests extends FantasyEsportsTestFixture
   final ZonedDateTime endDate = ZonedDateTime.now().plusMonths(1);
 
   @Test
-  public void testGetLeaguesSucessful() throws Exception
+  public void testGetLeaguesSuccessful() throws Exception
   {
     ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
     ConvenienceMethods.createLeague("test124", PRE_REGISTERED_USER1.sessionKey);
@@ -38,7 +38,7 @@ public class GetLeagueTests extends FantasyEsportsTestFixture
   }
 
   @Test
-  public void testGetLeagueSucessful() throws Exception
+  public void testGetLeagueSuccessful() throws Exception
   {
     ConvenienceMethods.createLeague("test123", this.startDate, this.endDate, PRE_REGISTERED_USER1.sessionKey);
     List<League> leagues = ConvenienceMethods.getLeagues();
@@ -48,7 +48,6 @@ public class GetLeagueTests extends FantasyEsportsTestFixture
     assertThat(response.getStatus()).isEqualTo(200);
     League league = GsonSingleton.fromJson(response.getBody().toString(), League.class);
     assertThat(league.getName()).isEqualTo("test123");
-    assertThat(league.getOwnerDisplayName()).isEqualTo(PRE_REGISTERED_USER1.displayName);
     assertThat(league.getStartDate()).isEqualTo(this.startDate);
     assertThat(league.getEndDate()).isEqualTo(this.endDate);
   }

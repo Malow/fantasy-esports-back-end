@@ -1,5 +1,6 @@
 package com.github.malow.FantasyEsports.services.account;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,9 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.github.malow.FantasyEsports.services.HttpResponseException;
 import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
-import com.github.malow.FantasyEsports.services.account.requests.ModifyAccountRequest;
 import com.github.malow.FantasyEsports.services.account.requests.LoginRequest;
+import com.github.malow.FantasyEsports.services.account.requests.ModifyAccountRequest;
 import com.github.malow.FantasyEsports.services.account.requests.RegisterRequest;
+import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.AccountNotFoundException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.DisplayNameTakenException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.EmailNotRegisteredException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.EmailTakenException;
@@ -49,8 +51,8 @@ public class AccountService
     Account account = new Account(request.email, request.displayName, PasswordHandler.hashPassword(request.password));
     String sessionKey = UUID.randomUUID().toString();
     account.setSessionKey(sessionKey);
-    this.repository.insert(account);
-    return new LoginResponse(sessionKey);
+    account = this.repository.insert(account);
+    return new LoginResponse(sessionKey, account.getId());
   }
 
   public LoginResponse login(LoginRequest request) throws HttpResponseException
@@ -64,8 +66,8 @@ public class AccountService
     {
       String sessionKey = UUID.randomUUID().toString();
       account.setSessionKey(sessionKey);
-      this.repository.save(account);
-      return new LoginResponse(sessionKey);
+      account = this.repository.save(account);
+      return new LoginResponse(sessionKey, account.getId());
     }
     else
     {
@@ -109,6 +111,16 @@ public class AccountService
       }
     }
 
-    this.repository.save(account);
+    account = this.repository.save(account);
+  }
+
+  public Account getAccount(String id) throws AccountNotFoundException
+  {
+    Optional<Account> account = this.repository.findById(id);
+    if (account.isPresent())
+    {
+      return account.get();
+    }
+    throw new AccountNotFoundException();
   }
 }

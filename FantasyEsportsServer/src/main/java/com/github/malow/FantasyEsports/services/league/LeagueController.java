@@ -18,6 +18,7 @@ import com.github.malow.FantasyEsports.services.HttpResponseException;
 import com.github.malow.FantasyEsports.services.account.Account;
 import com.github.malow.FantasyEsports.services.account.AccountService;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
+import com.github.malow.FantasyEsports.services.league.requests.InviteManagerRequest;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.malowlib.GsonSingleton;
 
@@ -64,7 +65,38 @@ public class LeagueController extends Controller
     {
       Account account = this.accountService.authorize(sessionKey);
       CreateLeagueRequest request = this.getValidRequest(payload, CreateLeagueRequest.class);
-      this.leagueService.createLeague(request, account);
+      League league = this.leagueService.createLeague(request, account);
+      return ResponseEntity.ok(GsonSingleton.toJson(league));
+    }
+    catch (HttpResponseException e)
+    {
+      return this.handleHttpResponseException(e);
+    }
+  }
+
+  @GetMapping(value = { "/league/{id}/manager" })
+  public ResponseEntity<String> getManagers(@PathVariable String id)
+  {
+    try
+    {
+      return ResponseEntity.ok(GsonSingleton.toJson(this.leagueService.getManagersForLeague(id)));
+    }
+    catch (HttpResponseException e)
+    {
+      return this.handleHttpResponseException(e);
+    }
+  }
+
+  @PostMapping(value = { "/league/{id}/manager" })
+  public ResponseEntity<String> inviteManager(@RequestBody String payload, @PathVariable String id,
+      @RequestHeader(value = "Session-Key", required = false) String sessionKey)
+  {
+    try
+    {
+      Account inviterAccount = this.accountService.authorize(sessionKey);
+      InviteManagerRequest request = this.getValidRequest(payload, InviteManagerRequest.class);
+      Account inviteeAccount = this.accountService.getAccount(request.inviteeAccountId);
+      this.leagueService.inviteManager(inviteeAccount, id, inviterAccount);
       return ResponseEntity.ok("");
     }
     catch (HttpResponseException e)

@@ -4,13 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
+import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
-import com.github.malow.FantasyEsports.services.account.requests.LoginRequest;
 import com.github.malow.FantasyEsports.services.account.requests.ModifyAccountRequest;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.DisplayNameTakenException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.EmailTakenException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.WrongPasswordException;
-import com.github.malow.FantasyEsports.services.account.responses.GetOwnAccountResponse;
+import com.github.malow.FantasyEsports.services.account.responses.GetAccountResponse;
 import com.github.malow.malowlib.GsonSingleton;
 import com.google.common.collect.ImmutableMap;
 import com.mashape.unirest.http.HttpResponse;
@@ -26,15 +26,12 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(response.getBody().toString()).isEqualTo("");
-    GetOwnAccountResponse getResponse = GsonSingleton.fromJson(
+    GetAccountResponse getResponse = GsonSingleton.fromJson(
         this.makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey)).getBody().toString(),
-        GetOwnAccountResponse.class);
+        GetAccountResponse.class);
     assertThat(getResponse.displayName).isEqualTo("newDisplayName");
     assertThat(getResponse.email).isEqualTo("newEmail@email.com");
-    LoginRequest loginRequest = new LoginRequest("newEmail@email.com", "newPass");
-    HttpResponse<String> loginResponse = this.makePostRequest("/account/login", loginRequest);
-    assertThat(loginResponse.getStatus()).isEqualTo(200);
-    assertThat(loginResponse.getBody().toString()).containsPattern("\\{\"sessionKey\":\"([0-9a-f-]+)\"\\}");
+    ConvenienceMethods.login(new TestUser("newEmail@email.com", null, "newPass"));
   }
 
   @Test
@@ -55,15 +52,12 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(response.getBody().toString()).isEqualTo("");
-    GetOwnAccountResponse getResponse = GsonSingleton.fromJson(
+    GetAccountResponse getResponse = GsonSingleton.fromJson(
         this.makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey)).getBody().toString(),
-        GetOwnAccountResponse.class);
+        GetAccountResponse.class);
     assertThat(getResponse.displayName).isEqualTo("newDisplayName");
     assertThat(getResponse.email).isEqualTo(PRE_REGISTERED_USER1.email);
-    LoginRequest loginRequest = new LoginRequest(PRE_REGISTERED_USER1.email, PRE_REGISTERED_USER1.password);
-    HttpResponse<String> loginResponse = this.makePostRequest("/account/login", loginRequest);
-    assertThat(loginResponse.getStatus()).isEqualTo(200);
-    assertThat(loginResponse.getBody().toString()).containsPattern("\\{\"sessionKey\":\"([0-9a-f-]+)\"\\}");
+    ConvenienceMethods.login(PRE_REGISTERED_USER1);
   }
 
   @Test

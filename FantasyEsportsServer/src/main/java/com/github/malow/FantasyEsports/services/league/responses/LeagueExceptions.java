@@ -22,4 +22,12 @@ public class LeagueExceptions
       super(HttpStatus.NOT_FOUND, ErrorCode.LEAGUE_DOES_NOT_EXIST, "No league found");
     }
   }
+
+  public static class UserIsAlreadyMemberInLeagueException extends HttpResponseException
+  {
+    public UserIsAlreadyMemberInLeagueException()
+    {
+      super(HttpStatus.BAD_REQUEST, ErrorCode.USER_ALREADY_MEMBER_IN_LEAGUE, "That user is already a member in this league");
+    }
+  }
 }

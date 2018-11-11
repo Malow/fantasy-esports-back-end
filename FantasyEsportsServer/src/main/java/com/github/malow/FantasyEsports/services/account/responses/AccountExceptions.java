@@ -38,4 +38,12 @@ public class AccountExceptions
       super(HttpStatus.BAD_REQUEST, ErrorCode.PASSWORD_INCORRECT, "Wrong password");
     }
   }
+
+  public static class AccountNotFoundException extends HttpResponseException
+  {
+    public AccountNotFoundException()
+    {
+      super(HttpStatus.BAD_REQUEST, ErrorCode.ACCOUNT_NOT_FOUND, "Couldn't find an account with that id");
+    }
+  }
 }

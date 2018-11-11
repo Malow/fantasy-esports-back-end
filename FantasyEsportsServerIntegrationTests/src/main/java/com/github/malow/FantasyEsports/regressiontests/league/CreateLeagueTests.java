@@ -9,8 +9,10 @@ import org.junit.Test;
 import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
+import com.github.malow.FantasyEsports.services.league.League;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.CreateNameTakenException;
+import com.github.malow.malowlib.GsonSingleton;
 import com.google.common.collect.ImmutableMap;
 import com.mashape.unirest.http.HttpResponse;
 
@@ -27,7 +29,11 @@ public class CreateLeagueTests extends FantasyEsportsTestFixture
     HttpResponse<String> response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(response.getBody().toString()).isEqualTo("");
+    League league = GsonSingleton.fromJson(response.getBody().toString(), League.class);
+    assertThat(league.getId()).matches("[0-9a-f-]+");
+    assertThat(league.getName()).isEqualTo("test123");
+    assertThat(league.getStartDate()).isEqualTo(this.startDate);
+    assertThat(league.getEndDate()).isEqualTo(this.endDate);
   }
 
   @Test

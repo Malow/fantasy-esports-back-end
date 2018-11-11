@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,7 +16,7 @@ import com.github.malow.FantasyEsports.services.HttpResponseException;
 import com.github.malow.FantasyEsports.services.account.requests.LoginRequest;
 import com.github.malow.FantasyEsports.services.account.requests.ModifyAccountRequest;
 import com.github.malow.FantasyEsports.services.account.requests.RegisterRequest;
-import com.github.malow.FantasyEsports.services.account.responses.GetOwnAccountResponse;
+import com.github.malow.FantasyEsports.services.account.responses.GetAccountResponse;
 import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
 import com.github.malow.malowlib.GsonSingleton;
 
@@ -62,7 +63,21 @@ public class AccountController extends Controller
     try
     {
       Account account = this.accountService.authorize(sessionKey);
-      return ResponseEntity.ok(GsonSingleton.toJson(new GetOwnAccountResponse(account)));
+      return ResponseEntity.ok(GsonSingleton.toJson(new GetAccountResponse(account)));
+    }
+    catch (HttpResponseException e)
+    {
+      return this.handleHttpResponseException(e);
+    }
+  }
+
+  @GetMapping(value = { "/account/{id}" })
+  public ResponseEntity<String> getAccount(@PathVariable String id)
+  {
+    try
+    {
+      Account account = this.accountService.getAccount(id);
+      return ResponseEntity.ok(GsonSingleton.toJson(new GetAccountResponse(account)));
     }
     catch (HttpResponseException e)
     {

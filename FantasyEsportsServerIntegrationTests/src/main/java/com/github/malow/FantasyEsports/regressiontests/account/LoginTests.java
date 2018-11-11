@@ -8,6 +8,8 @@ import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.account.requests.LoginRequest;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.EmailNotRegisteredException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.WrongPasswordException;
+import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
+import com.github.malow.malowlib.GsonSingleton;
 import com.mashape.unirest.http.HttpResponse;
 
 public class LoginTests extends FantasyEsportsTestFixture
@@ -18,10 +20,12 @@ public class LoginTests extends FantasyEsportsTestFixture
   {
     LoginRequest request = new LoginRequest(PRE_REGISTERED_USER1.email, PRE_REGISTERED_USER1.password);
 
-    HttpResponse<String> response = this.makePostRequest("/account/login", request);
+    HttpResponse<String> httpResponse = this.makePostRequest("/account/login", request);
 
-    assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(response.getBody().toString()).containsPattern("\\{\"sessionKey\":\"([0-9a-f-]+)\"\\}");
+    assertThat(httpResponse.getStatus()).isEqualTo(200);
+    LoginResponse response = GsonSingleton.fromJson(httpResponse.getBody().toString(), LoginResponse.class);
+    assertThat(response.sessionKey).matches("[0-9a-f-]+");
+    assertThat(response.accountId).matches("[0-9a-f-]+");
   }
 
   @Test

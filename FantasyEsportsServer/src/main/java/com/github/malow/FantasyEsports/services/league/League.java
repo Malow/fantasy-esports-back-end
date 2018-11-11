@@ -10,14 +10,12 @@ public class League
   private String id;
 
   private String name;
-  private String ownerDisplayName;
-  public ZonedDateTime startDate;
-  public ZonedDateTime endDate;
+  private ZonedDateTime startDate;
+  private ZonedDateTime endDate;
 
-  public League(String name, String ownerDisplayName, ZonedDateTime startDate, ZonedDateTime endDate)
+  public League(String name, ZonedDateTime startDate, ZonedDateTime endDate)
   {
     this.name = name;
-    this.ownerDisplayName = ownerDisplayName;
     this.startDate = startDate;
     this.endDate = endDate;
   }
@@ -30,11 +28,6 @@ public class League
   public String getName()
   {
     return this.name;
-  }
-
-  public String getOwnerDisplayName()
-  {
-    return this.ownerDisplayName;
   }
 
   public ZonedDateTime getStartDate()

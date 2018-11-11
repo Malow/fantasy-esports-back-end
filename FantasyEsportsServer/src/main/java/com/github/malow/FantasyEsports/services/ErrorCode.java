@@ -10,7 +10,9 @@ public enum ErrorCode
   MISSING_MANDATORY_FIELD("missing-mandatory-field"),
   UNAUTHORIZED("unauthorized"),
   LEAGUE_NAME_EXISTS("league-name-exists"),
-  LEAGUE_DOES_NOT_EXIST("league-does-not-exist");
+  LEAGUE_DOES_NOT_EXIST("league-does-not-exist"),
+  ACCOUNT_NOT_FOUND("account-not-found"),
+  USER_ALREADY_MEMBER_IN_LEAGUE("user-already-member-in-league");
 
   private final String errorCode;
 
