@@ -65,4 +65,18 @@ public class LoginTests extends FantasyEsportsTestFixture
 
     this.assertThatResponseEqualsException(response, new EmailNotRegisteredException());
   }
+
+  @Test
+  public void testThatIfYouLoginTwiceYouGetTheSameSessionKey() throws Exception
+  {
+    LoginRequest request = new LoginRequest(PRE_REGISTERED_USER1.email, PRE_REGISTERED_USER1.password);
+
+    HttpResponse<String> httpResponse = this.makePostRequest("/account/login", request);
+    LoginResponse response = GsonSingleton.fromJson(httpResponse.getBody().toString(), LoginResponse.class);
+    assertThat(response.sessionKey).isEqualTo(PRE_REGISTERED_USER1.sessionKey);
+
+    httpResponse = this.makePostRequest("/account/login", request);
+    response = GsonSingleton.fromJson(httpResponse.getBody().toString(), LoginResponse.class);
+    assertThat(response.sessionKey).isEqualTo(PRE_REGISTERED_USER1.sessionKey);
+  }
 }

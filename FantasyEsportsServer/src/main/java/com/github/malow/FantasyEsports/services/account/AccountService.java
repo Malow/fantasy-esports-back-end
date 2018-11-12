@@ -64,7 +64,11 @@ public class AccountService
     }
     if (PasswordHandler.checkPassword(request.password, account.getPassword()))
     {
-      String sessionKey = UUID.randomUUID().toString();
+      String sessionKey = account.getSessionKey();
+      if (sessionKey == null)
+      {
+        sessionKey = UUID.randomUUID().toString();
+      }
       account.setSessionKey(sessionKey);
       account = this.repository.save(account);
       return new LoginResponse(sessionKey, account.getId());
