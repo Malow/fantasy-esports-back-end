@@ -33,6 +33,10 @@ public abstract class Request
         {
           throw new MissingMandatoryFieldException(field.getName());
         }
+        if (field.getType().equals(String.class) && ((String) o).isEmpty())
+        {
+          throw new MissingMandatoryFieldException(field.getName());
+        }
       }
       catch (MissingMandatoryFieldException e)
       {
@@ -46,7 +50,7 @@ public abstract class Request
     this.validateSpecific();
   }
 
-  public void validateSpecific()
+  protected void validateSpecific()
   {
 
   }

@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
+import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
 import com.github.malow.FantasyEsports.services.league.League;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
@@ -41,18 +42,15 @@ public class CreateLeagueTests extends FantasyEsportsTestFixture
   {
     CreateLeagueRequest request = new CreateLeagueRequest(null, this.startDate, this.endDate);
     HttpResponse<String> response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getBody().toString()).contains("Missing mandatory field: name");
+    this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("name"));
 
     request = new CreateLeagueRequest("test123", null, this.endDate);
     response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getBody().toString()).contains("Missing mandatory field: startDate");
+    this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("startDate"));
 
     request = new CreateLeagueRequest("test123", this.startDate, null);
     response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getBody().toString()).contains("Missing mandatory field: endDate");
+    this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("endDate"));
   }
 
   @Test

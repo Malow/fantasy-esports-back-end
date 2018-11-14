@@ -1,5 +1,7 @@
 package com.github.malow.FantasyEsports.services.account;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -9,15 +11,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.malow.FantasyEsports.services.Controller;
 import com.github.malow.FantasyEsports.services.HttpResponseException;
+import com.github.malow.FantasyEsports.services.account.requests.FindAccountRequest;
 import com.github.malow.FantasyEsports.services.account.requests.LoginRequest;
 import com.github.malow.FantasyEsports.services.account.requests.ModifyAccountRequest;
 import com.github.malow.FantasyEsports.services.account.requests.RegisterRequest;
-import com.github.malow.FantasyEsports.services.account.responses.GetAccountResponse;
+import com.github.malow.FantasyEsports.services.account.responses.FindAccountResponse;
 import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
+import com.github.malow.FantasyEsports.services.account.responses.ResponseAccount;
 import com.github.malow.malowlib.GsonSingleton;
 
 @CrossOrigin(maxAge = 3600)
@@ -63,7 +69,23 @@ public class AccountController extends Controller
     try
     {
       Account account = this.accountService.authorize(sessionKey);
-      return ResponseEntity.ok(GsonSingleton.toJson(new GetAccountResponse(account)));
+      return ResponseEntity.ok(GsonSingleton.toJson(new ResponseAccount(account)));
+    }
+    catch (HttpResponseException e)
+    {
+      return this.handleHttpResponseException(e);
+    }
+  }
+
+  @RequestMapping(value = "/account/find", method = RequestMethod.GET)
+  public ResponseEntity<String> findAccount(FindAccountRequest request)
+  {
+    try
+    {
+      request.validate();
+      String displayName = request.displayName;
+      List<Account> accounts = this.accountService.findAccount(displayName);
+      return ResponseEntity.ok(GsonSingleton.toJson(new FindAccountResponse(accounts)));
     }
     catch (HttpResponseException e)
     {
@@ -77,7 +99,7 @@ public class AccountController extends Controller
     try
     {
       Account account = this.accountService.getAccount(id);
-      return ResponseEntity.ok(GsonSingleton.toJson(new GetAccountResponse(account)));
+      return ResponseEntity.ok(GsonSingleton.toJson(new ResponseAccount(account)));
     }
     catch (HttpResponseException e)
     {

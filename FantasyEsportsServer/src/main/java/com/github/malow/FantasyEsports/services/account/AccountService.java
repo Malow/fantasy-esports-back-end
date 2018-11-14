@@ -1,5 +1,6 @@
 package com.github.malow.FantasyEsports.services.account;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -126,5 +127,10 @@ public class AccountService
       return account.get();
     }
     throw new AccountNotFoundException();
+  }
+
+  public List<Account> findAccount(String displayName)
+  {
+    return this.repository.findByDisplayNameIgnoreCaseContaining(displayName);
   }
 }

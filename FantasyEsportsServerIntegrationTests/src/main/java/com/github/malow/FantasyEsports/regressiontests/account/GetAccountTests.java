@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.AccountNotFoundException;
-import com.github.malow.FantasyEsports.services.account.responses.GetAccountResponse;
+import com.github.malow.FantasyEsports.services.account.responses.ResponseAccount;
 import com.github.malow.malowlib.GsonSingleton;
 import com.google.common.collect.ImmutableMap;
 import com.mashape.unirest.http.HttpResponse;
@@ -20,7 +20,8 @@ public class GetAccountTests extends FantasyEsportsTestFixture
     HttpResponse<String> response = this.makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     assertThat(response.getStatus()).isEqualTo(200);
-    GetAccountResponse responseObject = GsonSingleton.fromJson(response.getBody().toString(), GetAccountResponse.class);
+    ResponseAccount responseObject = GsonSingleton.fromJson(response.getBody().toString(), ResponseAccount.class);
+    assertThat(responseObject.accountId).isEqualTo(PRE_REGISTERED_USER1.accountId);
     assertThat(responseObject.displayName).isEqualTo(PRE_REGISTERED_USER1.displayName);
     assertThat(responseObject.email).isEqualTo(PRE_REGISTERED_USER1.email);
   }
@@ -39,7 +40,8 @@ public class GetAccountTests extends FantasyEsportsTestFixture
     HttpResponse<String> response = this.makeGetRequest("/account/" + PRE_REGISTERED_USER2.accountId);
 
     assertThat(response.getStatus()).isEqualTo(200);
-    GetAccountResponse responseObject = GsonSingleton.fromJson(response.getBody().toString(), GetAccountResponse.class);
+    ResponseAccount responseObject = GsonSingleton.fromJson(response.getBody().toString(), ResponseAccount.class);
+    assertThat(responseObject.accountId).isEqualTo(PRE_REGISTERED_USER2.accountId);
     assertThat(responseObject.displayName).isEqualTo(PRE_REGISTERED_USER2.displayName);
     assertThat(responseObject.email).isEqualTo(PRE_REGISTERED_USER2.email);
   }

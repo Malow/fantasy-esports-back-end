@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
+import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.FantasyEsports.services.account.requests.LoginRequest;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.EmailNotRegisteredException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.WrongPasswordException;
@@ -33,13 +34,11 @@ public class LoginTests extends FantasyEsportsTestFixture
   {
     LoginRequest request = new LoginRequest(null, PRE_REGISTERED_USER1.password);
     HttpResponse<String> response = this.makePostRequest("/account/login", request);
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getBody().toString()).contains("Missing mandatory field: email");
+    this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("email"));
 
     request = new LoginRequest(PRE_REGISTERED_USER1.email, null);
     response = this.makePostRequest("/account/login", request);
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getBody().toString()).contains("Missing mandatory field: password");
+    this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("password"));
   }
 
   @Test

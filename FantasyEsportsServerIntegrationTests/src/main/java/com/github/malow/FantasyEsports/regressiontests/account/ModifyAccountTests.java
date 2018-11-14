@@ -6,11 +6,12 @@ import org.junit.Test;
 
 import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
+import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.FantasyEsports.services.account.requests.ModifyAccountRequest;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.DisplayNameTakenException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.EmailTakenException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.WrongPasswordException;
-import com.github.malow.FantasyEsports.services.account.responses.GetAccountResponse;
+import com.github.malow.FantasyEsports.services.account.responses.ResponseAccount;
 import com.github.malow.malowlib.GsonSingleton;
 import com.google.common.collect.ImmutableMap;
 import com.mashape.unirest.http.HttpResponse;
@@ -26,11 +27,12 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(response.getBody().toString()).isEqualTo("");
-    GetAccountResponse getResponse = GsonSingleton.fromJson(
+    ResponseAccount getResponse = GsonSingleton.fromJson(
         this.makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey)).getBody().toString(),
-        GetAccountResponse.class);
+        ResponseAccount.class);
     assertThat(getResponse.displayName).isEqualTo("newDisplayName");
     assertThat(getResponse.email).isEqualTo("newEmail@email.com");
+    assertThat(getResponse.accountId).isEqualTo(PRE_REGISTERED_USER1.accountId);
     ConvenienceMethods.login(new TestUser("newEmail@email.com", null, "newPass"));
   }
 
@@ -39,8 +41,7 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
   {
     ModifyAccountRequest request = new ModifyAccountRequest(null, "newPass", "newEmail@email.com", "newDisplayName");
     HttpResponse<String> response = this.makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getBody().toString()).contains("Missing mandatory field: currentPassword");
+    this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("currentPassword"));
   }
 
   @Test
@@ -52,11 +53,12 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(response.getBody().toString()).isEqualTo("");
-    GetAccountResponse getResponse = GsonSingleton.fromJson(
+    ResponseAccount getResponse = GsonSingleton.fromJson(
         this.makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey)).getBody().toString(),
-        GetAccountResponse.class);
+        ResponseAccount.class);
     assertThat(getResponse.displayName).isEqualTo("newDisplayName");
     assertThat(getResponse.email).isEqualTo(PRE_REGISTERED_USER1.email);
+    assertThat(getResponse.accountId).isEqualTo(PRE_REGISTERED_USER1.accountId);
     ConvenienceMethods.login(PRE_REGISTERED_USER1);
   }
 

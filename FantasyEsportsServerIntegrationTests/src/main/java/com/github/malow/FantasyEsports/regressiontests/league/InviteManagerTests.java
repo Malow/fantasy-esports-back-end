@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
+import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.AccountNotFoundException;
 import com.github.malow.FantasyEsports.services.league.LeagueRole;
@@ -65,8 +66,7 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
     HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getBody().toString()).contains("Missing mandatory field: inviteeAccountId");
+    this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("inviteeAccountId"));
   }
 
 

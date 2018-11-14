@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
+import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.FantasyEsports.services.account.requests.RegisterRequest;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.DisplayNameTakenException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.EmailTakenException;
@@ -33,18 +34,15 @@ public class RegisterTests extends FantasyEsportsTestFixture
   {
     RegisterRequest request = new RegisterRequest(null, "tester123", "tester123pw");
     HttpResponse<String> response = this.makePostRequest("/account/register", request);
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getBody().toString()).contains("Missing mandatory field: email");
+    this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("email"));
 
     request = new RegisterRequest("tester123@test.com", null, "tester123pw");
     response = this.makePostRequest("/account/register", request);
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getBody().toString()).contains("Missing mandatory field: displayName");
+    this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("displayName"));
 
     request = new RegisterRequest("tester123@test.com", "tester123", null);
     response = this.makePostRequest("/account/register", request);
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getBody().toString()).contains("Missing mandatory field: password");
+    this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("password"));
   }
 
   @Test
