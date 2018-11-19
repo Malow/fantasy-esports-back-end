@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.malow.FantasyEsports.apidoc.ApiDoc;
 import com.github.malow.FantasyEsports.services.Controller;
 import com.github.malow.FantasyEsports.services.HttpResponseException;
 import com.github.malow.FantasyEsports.services.account.Account;
@@ -22,6 +23,7 @@ import com.github.malow.FantasyEsports.services.league.requests.InviteManagerReq
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.malowlib.GsonSingleton;
 
+@ApiDoc("Represents leagues")
 @CrossOrigin(maxAge = 3600)
 @RestController
 public class LeagueController extends Controller
@@ -33,6 +35,7 @@ public class LeagueController extends Controller
   @Autowired
   private LeagueService leagueService;
 
+  @ApiDoc("Lists all leagues that exist")
   @GetMapping(value = { "/league" })
   public ResponseEntity<String> listLeagues()
   {
@@ -40,12 +43,13 @@ public class LeagueController extends Controller
     return ResponseEntity.ok(GsonSingleton.toJson(leagues));
   }
 
-  @GetMapping(value = { "/league/{id}" })
-  public ResponseEntity<String> getLeague(@PathVariable String id)
+  @ApiDoc("Get details for a specific league with the provided id")
+  @GetMapping(value = { "/league/{leagueId}" })
+  public ResponseEntity<String> getLeague(@PathVariable String leagueId)
   {
     try
     {
-      Optional<League> league = this.leagueRepository.findById(id);
+      Optional<League> league = this.leagueRepository.findById(leagueId);
       if (league.isPresent())
       {
         return ResponseEntity.ok(GsonSingleton.toJson(league.get()));
@@ -58,6 +62,7 @@ public class LeagueController extends Controller
     }
   }
 
+  @ApiDoc("Creates a new league")
   @PostMapping(value = { "/league" })
   public ResponseEntity<String> createLeague(@RequestBody String payload, @RequestHeader(value = "Session-Key", required = false) String sessionKey)
   {
@@ -74,12 +79,13 @@ public class LeagueController extends Controller
     }
   }
 
-  @GetMapping(value = { "/league/{id}/manager" })
-  public ResponseEntity<String> getManagers(@PathVariable String id)
+  @ApiDoc("Lists all managers for a specific league with the provided id")
+  @GetMapping(value = { "/league/{leagueId}/manager" })
+  public ResponseEntity<String> getManagers(@PathVariable String leagueId)
   {
     try
     {
-      return ResponseEntity.ok(GsonSingleton.toJson(this.leagueService.getManagersForLeague(id)));
+      return ResponseEntity.ok(GsonSingleton.toJson(this.leagueService.getManagersForLeague(leagueId)));
     }
     catch (HttpResponseException e)
     {
@@ -87,8 +93,9 @@ public class LeagueController extends Controller
     }
   }
 
-  @PostMapping(value = { "/league/{id}/manager" })
-  public ResponseEntity<String> inviteManager(@RequestBody String payload, @PathVariable String id,
+  @ApiDoc("Invites a new manager to the specific league with the provided id")
+  @PostMapping(value = { "/league/{leagueId}/manager" })
+  public ResponseEntity<String> inviteManager(@RequestBody String payload, @PathVariable String leagueId,
       @RequestHeader(value = "Session-Key", required = false) String sessionKey)
   {
     try
@@ -96,7 +103,7 @@ public class LeagueController extends Controller
       Account inviterAccount = this.accountService.authorize(sessionKey);
       InviteManagerRequest request = this.getValidRequest(payload, InviteManagerRequest.class);
       Account inviteeAccount = this.accountService.getAccount(request.inviteeAccountId);
-      this.leagueService.inviteManager(inviteeAccount, id, inviterAccount);
+      this.leagueService.inviteManager(inviteeAccount, leagueId, inviterAccount);
       return ResponseEntity.ok("");
     }
     catch (HttpResponseException e)

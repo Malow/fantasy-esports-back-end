@@ -19,7 +19,7 @@ import com.github.malow.FantasyEsports.services.account.responses.AccountExcepti
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.WrongPasswordException;
 import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
 
-@Component("AccountServiceBeanName")
+@Component
 public class AccountService
 {
   @Autowired

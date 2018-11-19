@@ -3,6 +3,7 @@ logs
 target
 *.db
 LetsEncryptCerts
+config.txt
 
 # Created by https://www.gitignore.io/api/java,eclipse
 

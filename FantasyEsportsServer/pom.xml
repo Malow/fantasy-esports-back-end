@@ -40,12 +40,29 @@
 	  	<dependency>
 	    	<groupId>com.google.guava</groupId>
 	    	<artifactId>guava</artifactId>
-	    	<version>19.0</version>
+	    	<version>20.0</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.zalando</groupId>
 		    <artifactId>logbook-spring-boot-starter</artifactId>
 		    <version>1.5.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.reflections</groupId>
+		    <artifactId>reflections</artifactId>
+		    <version>0.9.11</version>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.11.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.11.1</version>
 		</dependency>
     </dependencies>
 

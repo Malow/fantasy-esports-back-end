@@ -109,6 +109,7 @@ public class FantasyEsportsTestFixture
   {
     database.getCollection("account").drop();
     database.getCollection("league").drop();
+    database.getCollection("manager").drop();
   }
 
   private void preRegisterAccounts() throws Exception

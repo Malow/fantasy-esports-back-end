@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.malow.FantasyEsports.apidoc.ApiDoc;
 import com.github.malow.FantasyEsports.services.Controller;
 import com.github.malow.FantasyEsports.services.HttpResponseException;
 import com.github.malow.FantasyEsports.services.account.requests.FindAccountRequest;
@@ -26,6 +27,7 @@ import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
 import com.github.malow.FantasyEsports.services.account.responses.ResponseAccount;
 import com.github.malow.malowlib.GsonSingleton;
 
+@ApiDoc("Represents user accounts")
 @CrossOrigin(maxAge = 3600)
 @RestController
 public class AccountController extends Controller
@@ -33,6 +35,7 @@ public class AccountController extends Controller
   @Autowired
   private AccountService accountService;
 
+  @ApiDoc("Registers an acocunt for a user")
   @PostMapping(value = { "/account/register" })
   public ResponseEntity<String> register(@RequestBody String payload)
   {
@@ -48,6 +51,7 @@ public class AccountController extends Controller
     }
   }
 
+  @ApiDoc("Logs a user in")
   @PostMapping(value = { "/account/login" })
   public ResponseEntity<String> login(@RequestBody String payload)
   {
@@ -63,6 +67,7 @@ public class AccountController extends Controller
     }
   }
 
+  @ApiDoc("Returns a logged-in user's own account")
   @GetMapping(value = { "/account" })
   public ResponseEntity<String> getOwnAccount(@RequestHeader(value = "Session-Key", required = false) String sessionKey)
   {
@@ -77,6 +82,7 @@ public class AccountController extends Controller
     }
   }
 
+  @ApiDoc("Returns a list of accounts where the displayName contains the string provided")
   @RequestMapping(value = "/account/find", method = RequestMethod.GET)
   public ResponseEntity<String> findAccount(FindAccountRequest request)
   {
@@ -93,12 +99,13 @@ public class AccountController extends Controller
     }
   }
 
-  @GetMapping(value = { "/account/{id}" })
-  public ResponseEntity<String> getAccount(@PathVariable String id)
+  @ApiDoc("Returns a specific account with the provided id")
+  @GetMapping(value = { "/account/{accountId}" })
+  public ResponseEntity<String> getAccount(@PathVariable String accountId)
   {
     try
     {
-      Account account = this.accountService.getAccount(id);
+      Account account = this.accountService.getAccount(accountId);
       return ResponseEntity.ok(GsonSingleton.toJson(new ResponseAccount(account)));
     }
     catch (HttpResponseException e)
@@ -107,6 +114,7 @@ public class AccountController extends Controller
     }
   }
 
+  @ApiDoc("Updates details for a logged-in user's account")
   @PatchMapping(value = { "/account" })
   public ResponseEntity<String> modifyAccount(@RequestBody String payload, @RequestHeader(value = "Session-Key", required = false) String sessionKey)
   {

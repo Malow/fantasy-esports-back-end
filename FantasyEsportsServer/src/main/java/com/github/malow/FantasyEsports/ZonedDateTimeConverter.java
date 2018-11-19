@@ -12,7 +12,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
 @Configuration
-public class SpringSucksAss // Needed cuz Spring can't handle Java's ZonedDateTime
+public class ZonedDateTimeConverter
 {
   @Bean
   public MongoCustomConversions customConversions()
