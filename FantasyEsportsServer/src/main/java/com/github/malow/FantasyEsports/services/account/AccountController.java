@@ -67,6 +67,22 @@ public class AccountController extends Controller
     }
   }
 
+  @ApiDoc("Logs a user out")
+  @GetMapping(value = { "/account/logout" })
+  public ResponseEntity<String> logout(@RequestHeader(value = "Session-Key", required = false) String sessionKey)
+  {
+    try
+    {
+      Account account = this.accountService.authorize(sessionKey);
+      this.accountService.logout(account);
+      return ResponseEntity.ok("");
+    }
+    catch (HttpResponseException e)
+    {
+      return this.handleHttpResponseException(e);
+    }
+  }
+
   @ApiDoc("Returns a logged-in user's own account")
   @GetMapping(value = { "/account" })
   public ResponseEntity<String> getOwnAccount(@RequestHeader(value = "Session-Key", required = false) String sessionKey)

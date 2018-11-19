@@ -80,6 +80,12 @@ public class AccountService
     }
   }
 
+  public void logout(Account account) throws HttpResponseException
+  {
+    account.setSessionKey("");
+    account = this.repository.save(account);
+  }
+
   public void modifyAccount(ModifyAccountRequest request, Account account) throws HttpResponseException
   {
     if (!PasswordHandler.checkPassword(request.currentPassword, account.getPassword()))

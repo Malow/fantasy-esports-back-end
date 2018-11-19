@@ -15,7 +15,6 @@ import com.mashape.unirest.http.HttpResponse;
 
 public class LoginTests extends FantasyEsportsTestFixture
 {
-
   @Test
   public void testSuccessful() throws Exception
   {
