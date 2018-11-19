@@ -2,7 +2,6 @@ package com.github.malow.FantasyEsports.regressiontests.league;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -16,11 +15,13 @@ import com.github.malow.FantasyEsports.services.league.LeagueRole;
 import com.github.malow.FantasyEsports.services.league.Manager;
 import com.github.malow.FantasyEsports.services.league.requests.InviteManagerRequest;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
+import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.UserIsAlreadyInvitedToLeagueException;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.UserIsAlreadyMemberInLeagueException;
 import com.github.malow.malowlib.GsonSingleton;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.reflect.TypeToken;
 import com.mashape.unirest.http.HttpResponse;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 
 public class InviteManagerTests extends FantasyEsportsTestFixture
 {
@@ -45,9 +46,7 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
     assertThat(response.getBody().toString()).isEqualTo("");
 
     response = this.makeGetRequest("/league/" + leagueId + "/manager");
-    List<Manager> managers = GsonSingleton.fromJson(response.getBody().toString(), new TypeToken<ArrayList<Manager>>()
-    {
-    }.getType());
+    List<Manager> managers = GsonSingleton.fromJsonAsList(response.getBody().toString(), Manager[].class);
     assertThat(managers).hasSize(3);
     Manager user2Manager = managers.stream().filter(m -> m.getAccountId().equals(PRE_REGISTERED_USER2.accountId)).findAny().get();
     assertThat(user2Manager.getLeagueRole()).isEqualTo(LeagueRole.INVITED);
@@ -122,6 +121,22 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
   {
     String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
     ConvenienceMethods.inviteManager(leagueId, PRE_REGISTERED_USER1.sessionKey, PRE_REGISTERED_USER2.accountId);
+    InviteManagerRequest request = new InviteManagerRequest(PRE_REGISTERED_USER2.accountId);
+
+    HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+        ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+
+    this.assertThatResponseEqualsException(response, new UserIsAlreadyInvitedToLeagueException());
+  }
+
+  @Test
+  public void testInviteAlreadyMember() throws Exception
+  {
+    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
+    ConvenienceMethods.inviteManager(leagueId, PRE_REGISTERED_USER1.sessionKey, PRE_REGISTERED_USER2.accountId);
+    //TODO: replace with normal way to accept invite
+    database.getCollection("manager").updateOne(Filters.eq("accountId", PRE_REGISTERED_USER2.accountId),
+        Updates.set("leagueRole", LeagueRole.MEMBER.name()));
     InviteManagerRequest request = new InviteManagerRequest(PRE_REGISTERED_USER2.accountId);
 
     HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,

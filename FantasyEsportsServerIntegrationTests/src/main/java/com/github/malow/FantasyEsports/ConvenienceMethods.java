@@ -3,7 +3,6 @@ package com.github.malow.FantasyEsports;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture.TestUser;
@@ -15,7 +14,6 @@ import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequ
 import com.github.malow.FantasyEsports.services.league.requests.InviteManagerRequest;
 import com.github.malow.malowlib.GsonSingleton;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.reflect.TypeToken;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 
@@ -64,9 +62,7 @@ public class ConvenienceMethods
 
   public static List<League> getLeagues() throws Exception
   {
-    return GsonSingleton.fromJson(Unirest.get(Config.HOST + "/league").asJson().getBody().toString(), new TypeToken<ArrayList<League>>()
-    {
-    }.getType());
+    return GsonSingleton.fromJsonAsList(Unirest.get(Config.HOST + "/league").asJson().getBody().toString(), League[].class);
   }
 
   public static void inviteManager(String leagueId, String sessionKey, String inviteeAccountid) throws Exception

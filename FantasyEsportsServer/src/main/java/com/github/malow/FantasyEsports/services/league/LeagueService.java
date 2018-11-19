@@ -12,6 +12,7 @@ import com.github.malow.FantasyEsports.services.account.Account;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.CreateNameTakenException;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
+import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.UserIsAlreadyInvitedToLeagueException;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.UserIsAlreadyMemberInLeagueException;
 
 @Component("LeagueServiceBeanName")
@@ -57,7 +58,7 @@ public class LeagueService
   }
 
   public void inviteManager(Account inviteeAccount, String leagueId, Account inviterAccount)
-      throws NoLeagueFoundException, UserIsAlreadyMemberInLeagueException, UnauthorizedException
+      throws NoLeagueFoundException, UserIsAlreadyMemberInLeagueException, UnauthorizedException, UserIsAlreadyInvitedToLeagueException
   {
     League league = this.getLeague(leagueId);
     List<Manager> managers = this.getManagersForLeague(league);
@@ -65,9 +66,17 @@ public class LeagueService
     {
       throw new UnauthorizedException();
     }
-    if (managers.stream().anyMatch(m -> m.getAccountId().equals(inviteeAccount.getId())))
+    Optional<Manager> existingManager = managers.stream().filter(m -> m.getAccountId().equals(inviteeAccount.getId())).findFirst();
+    if (existingManager.isPresent())
     {
-      throw new UserIsAlreadyMemberInLeagueException();
+      if (existingManager.get().getLeagueRole().equals(LeagueRole.INVITED))
+      {
+        throw new UserIsAlreadyInvitedToLeagueException();
+      }
+      else
+      {
+        throw new UserIsAlreadyMemberInLeagueException();
+      }
     }
     Manager manager = new Manager(inviteeAccount.getId(), league.getId(), LeagueRole.INVITED);
     manager = this.managerRepository.insert(manager);

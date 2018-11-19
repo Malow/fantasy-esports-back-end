@@ -30,4 +30,12 @@ public class LeagueExceptions
       super(HttpStatus.BAD_REQUEST, ErrorCode.USER_ALREADY_MEMBER_IN_LEAGUE, "That user is already a member in this league");
     }
   }
+
+  public static class UserIsAlreadyInvitedToLeagueException extends HttpResponseException
+  {
+    public UserIsAlreadyInvitedToLeagueException()
+    {
+      super(HttpStatus.BAD_REQUEST, ErrorCode.USER_ALREADY_INVITED_TO_LEAGUE, "That user is already invited to this league");
+    }
+  }
 }

@@ -2,7 +2,6 @@ package com.github.malow.FantasyEsports.regressiontests.league;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -13,7 +12,6 @@ import com.github.malow.FantasyEsports.services.league.LeagueRole;
 import com.github.malow.FantasyEsports.services.league.Manager;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.malowlib.GsonSingleton;
-import com.google.gson.reflect.TypeToken;
 import com.mashape.unirest.http.HttpResponse;
 
 public class GetManagersTests extends FantasyEsportsTestFixture
@@ -26,9 +24,7 @@ public class GetManagersTests extends FantasyEsportsTestFixture
     HttpResponse<String> response = this.makeGetRequest("/league/" + leagueId + "/manager");
 
     assertThat(response.getStatus()).isEqualTo(200);
-    List<Manager> managers = GsonSingleton.fromJson(response.getBody().toString(), new TypeToken<ArrayList<Manager>>()
-    {
-    }.getType());
+    List<Manager> managers = GsonSingleton.fromJsonAsList(response.getBody().toString(), Manager[].class);
     assertThat(managers.size()).isEqualTo(1);
     assertThat(managers.get(0).getLeagueRole()).isEqualTo(LeagueRole.OWNER);
     assertThat(managers.get(0).getAccountId()).isEqualTo(PRE_REGISTERED_USER1.accountId);

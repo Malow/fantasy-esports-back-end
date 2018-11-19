@@ -3,7 +3,6 @@ package com.github.malow.FantasyEsports.regressiontests.league;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +13,6 @@ import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.league.League;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.malowlib.GsonSingleton;
-import com.google.gson.reflect.TypeToken;
 import com.mashape.unirest.http.HttpResponse;
 
 public class GetLeagueTests extends FantasyEsportsTestFixture
@@ -31,9 +29,7 @@ public class GetLeagueTests extends FantasyEsportsTestFixture
     HttpResponse<String> response = this.makeGetRequest("/league");
 
     assertThat(response.getStatus()).isEqualTo(200);
-    List<League> leagues = GsonSingleton.fromJson(response.getBody().toString(), new TypeToken<ArrayList<League>>()
-    {
-    }.getType());
+    List<League> leagues = GsonSingleton.fromJsonAsList(response.getBody().toString(), League[].class);
     assertThat(leagues.stream().map(League::getName).collect(Collectors.toList())).containsExactlyInAnyOrder("test123", "test124");
   }
 
