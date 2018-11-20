@@ -81,4 +81,14 @@ public class LeagueService
     Manager manager = new Manager(inviteeAccount.getId(), league.getId(), LeagueRole.INVITED);
     manager = this.managerRepository.insert(manager);
   }
+
+  public List<Manager> getManagersForAccount(Account account)
+  {
+    return this.managerRepository.findByAccountId(account.getId());
+  }
+
+  public Optional<League> getLeagueForManager(Manager manager)
+  {
+    return this.leagueRepository.findById(manager.getLeagueId());
+  }
 }

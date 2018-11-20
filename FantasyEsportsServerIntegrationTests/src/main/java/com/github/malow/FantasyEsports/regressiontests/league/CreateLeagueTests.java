@@ -10,7 +10,8 @@ import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
-import com.github.malow.FantasyEsports.services.league.League;
+import com.github.malow.FantasyEsports.services.account.responses.ResponseLeague;
+import com.github.malow.FantasyEsports.services.league.LeagueRole;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.CreateNameTakenException;
 import com.github.malow.malowlib.GsonSingleton;
@@ -30,11 +31,17 @@ public class CreateLeagueTests extends FantasyEsportsTestFixture
     HttpResponse<String> response = this.makePostRequest("/league", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     assertThat(response.getStatus()).isEqualTo(200);
-    League league = GsonSingleton.fromJson(response.getBody().toString(), League.class);
-    assertThat(league.getId()).matches("[0-9a-f-]+");
-    assertThat(league.getName()).isEqualTo("test123");
-    assertThat(league.getStartDate()).isEqualTo(this.startDate);
-    assertThat(league.getEndDate()).isEqualTo(this.endDate);
+    ResponseLeague league = GsonSingleton.fromJson(response.getBody().toString(), ResponseLeague.class);
+    assertThat(league.id).matches("[0-9a-f-]+");
+    assertThat(league.name).isEqualTo("test123");
+    assertThat(league.startDate).isEqualTo(this.startDate);
+    assertThat(league.endDate).isEqualTo(this.endDate);
+    assertThat(league.managers).hasSize(1);
+    assertThat(league.managers.get(0).displayName).isEqualTo(PRE_REGISTERED_USER1.displayName);
+    assertThat(league.managers.get(0).accountId).isEqualTo(PRE_REGISTERED_USER1.accountId);
+    assertThat(league.managers.get(0).leagueId).isEqualTo(league.id);
+    assertThat(league.managers.get(0).leagueRole).isEqualTo(LeagueRole.OWNER);
+    assertThat(league.managers.get(0).score).isEqualTo(0);
   }
 
   @Test

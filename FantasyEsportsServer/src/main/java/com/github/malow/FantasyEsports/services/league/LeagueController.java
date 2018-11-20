@@ -1,7 +1,9 @@
 package com.github.malow.FantasyEsports.services.league;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,13 +13,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.malow.FantasyEsports.apidoc.ApiDoc;
 import com.github.malow.FantasyEsports.services.Controller;
 import com.github.malow.FantasyEsports.services.HttpResponseException;
+import com.github.malow.FantasyEsports.services.HttpResponseException.IllegalValueException;
 import com.github.malow.FantasyEsports.services.account.Account;
 import com.github.malow.FantasyEsports.services.account.AccountService;
+import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.AccountNotFoundException;
+import com.github.malow.FantasyEsports.services.account.responses.ResponseLeague;
+import com.github.malow.FantasyEsports.services.account.responses.ResponseManager;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
 import com.github.malow.FantasyEsports.services.league.requests.InviteManagerRequest;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
@@ -35,12 +42,43 @@ public class LeagueController extends Controller
   @Autowired
   private LeagueService leagueService;
 
-  @ApiDoc("Lists all leagues that exist")
+  @ApiDoc("Lists all leagues that the logged in user is related to")
   @GetMapping(value = { "/league" })
-  public ResponseEntity<String> listLeagues()
+  public ResponseEntity<String> listLeagues(@RequestParam(value = "role", required = false) String role,
+      @RequestHeader(value = "Session-Key", required = false) String sessionKey)
   {
-    List<League> leagues = this.leagueRepository.findAll();
-    return ResponseEntity.ok(GsonSingleton.toJson(leagues));
+    try
+    {
+      Account account = this.accountService.authorize(sessionKey);
+      List<Manager> managers = this.leagueService.getManagersForAccount(account);
+      if (role != null)
+      {
+        LeagueRole leagueRole;
+        try
+        {
+          leagueRole = LeagueRole.valueOf(role);
+        }
+        catch (IllegalArgumentException e)
+        {
+          throw new IllegalValueException("role");
+        }
+        managers = managers.stream().filter(m -> m.getLeagueRole().equals(leagueRole)).collect(Collectors.toList());
+      }
+      List<League> leagues = managers.stream().map(m -> this.leagueService.getLeagueForManager(m))
+          .filter(Optional::isPresent)
+          .map(Optional::get)
+          .collect(Collectors.toList());
+      List<ResponseLeague> responseLeagues = new ArrayList<>();
+      for (League league : leagues)
+      {
+        responseLeagues.add(this.convertToResponseLeague(league));
+      }
+      return ResponseEntity.ok(GsonSingleton.toJson(responseLeagues));
+    }
+    catch (HttpResponseException e)
+    {
+      return this.handleHttpResponseException(e);
+    }
   }
 
   @ApiDoc("Get details for a specific league with the provided id")
@@ -52,7 +90,8 @@ public class LeagueController extends Controller
       Optional<League> league = this.leagueRepository.findById(leagueId);
       if (league.isPresent())
       {
-        return ResponseEntity.ok(GsonSingleton.toJson(league.get()));
+        ResponseLeague responseLeague = this.convertToResponseLeague(league.get());
+        return ResponseEntity.ok(GsonSingleton.toJson(responseLeague));
       }
       throw new NoLeagueFoundException();
     }
@@ -71,7 +110,8 @@ public class LeagueController extends Controller
       Account account = this.accountService.authorize(sessionKey);
       CreateLeagueRequest request = this.getValidRequest(payload, CreateLeagueRequest.class);
       League league = this.leagueService.createLeague(request, account);
-      return ResponseEntity.ok(GsonSingleton.toJson(league));
+      ResponseLeague responseLeague = this.convertToResponseLeague(league);
+      return ResponseEntity.ok(GsonSingleton.toJson(responseLeague));
     }
     catch (HttpResponseException e)
     {
@@ -85,7 +125,12 @@ public class LeagueController extends Controller
   {
     try
     {
-      return ResponseEntity.ok(GsonSingleton.toJson(this.leagueService.getManagersForLeague(leagueId)));
+      List<ResponseManager> responseManagers = new ArrayList<>();
+      for (Manager manager : this.leagueService.getManagersForLeague(leagueId))
+      {
+        responseManagers.add(this.convertToResponseManager(manager));
+      }
+      return ResponseEntity.ok(GsonSingleton.toJson(responseManagers));
     }
     catch (HttpResponseException e)
     {
@@ -110,5 +155,25 @@ public class LeagueController extends Controller
     {
       return this.handleHttpResponseException(e);
     }
+  }
+
+  /*
+   *
+   */
+
+  private ResponseLeague convertToResponseLeague(League league) throws NoLeagueFoundException, AccountNotFoundException
+  {
+    List<ResponseManager> responseManagers = new ArrayList<>();
+    for (Manager manager : this.leagueService.getManagersForLeague(league))
+    {
+      responseManagers.add(this.convertToResponseManager(manager));
+    }
+    return new ResponseLeague(league, responseManagers);
+  }
+
+  private ResponseManager convertToResponseManager(Manager manager) throws AccountNotFoundException
+  {
+    Account account = this.accountService.getAccount(manager.getAccountId());
+    return new ResponseManager(manager, account.getDisplayName());
   }
 }

@@ -13,7 +13,8 @@ public enum ErrorCode
   LEAGUE_DOES_NOT_EXIST("league-does-not-exist"),
   ACCOUNT_NOT_FOUND("account-not-found"),
   USER_ALREADY_MEMBER_IN_LEAGUE("user-already-member-in-league"),
-  USER_ALREADY_INVITED_TO_LEAGUE("user-already-invited-to-league");
+  USER_ALREADY_INVITED_TO_LEAGUE("user-already-invited-to-league"),
+  ILLEGAL_VALUE("illegal-value");
 
   private final String errorCode;
 

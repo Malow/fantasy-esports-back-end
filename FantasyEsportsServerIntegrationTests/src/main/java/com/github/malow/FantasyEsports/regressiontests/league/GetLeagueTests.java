@@ -3,14 +3,13 @@ package com.github.malow.FantasyEsports.regressiontests.league;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.Test;
 
 import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
-import com.github.malow.FantasyEsports.services.league.League;
+import com.github.malow.FantasyEsports.services.account.responses.ResponseLeague;
+import com.github.malow.FantasyEsports.services.league.LeagueRole;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.malowlib.GsonSingleton;
 import com.mashape.unirest.http.HttpResponse;
@@ -21,31 +20,24 @@ public class GetLeagueTests extends FantasyEsportsTestFixture
   final ZonedDateTime endDate = ZonedDateTime.now().plusMonths(1);
 
   @Test
-  public void testGetLeaguesSuccessful() throws Exception
-  {
-    ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
-    ConvenienceMethods.createLeague("test124", PRE_REGISTERED_USER1.sessionKey);
-
-    HttpResponse<String> response = this.makeGetRequest("/league");
-
-    assertThat(response.getStatus()).isEqualTo(200);
-    List<League> leagues = GsonSingleton.fromJsonAsList(response.getBody().toString(), League[].class);
-    assertThat(leagues.stream().map(League::getName).collect(Collectors.toList())).containsExactlyInAnyOrder("test123", "test124");
-  }
-
-  @Test
   public void testGetLeagueSuccessful() throws Exception
   {
-    ConvenienceMethods.createLeague("test123", this.startDate, this.endDate, PRE_REGISTERED_USER1.sessionKey);
-    List<League> leagues = ConvenienceMethods.getLeagues();
+    String id = ConvenienceMethods.createLeague("test123", this.startDate, this.endDate, PRE_REGISTERED_USER1.sessionKey);
 
-    HttpResponse<String> response = this.makeGetRequest("/league/" + leagues.get(0).getId());
+    HttpResponse<String> response = this.makeGetRequest("/league/" + id);
 
     assertThat(response.getStatus()).isEqualTo(200);
-    League league = GsonSingleton.fromJson(response.getBody().toString(), League.class);
-    assertThat(league.getName()).isEqualTo("test123");
-    assertThat(league.getStartDate()).isEqualTo(this.startDate);
-    assertThat(league.getEndDate()).isEqualTo(this.endDate);
+    ResponseLeague league = GsonSingleton.fromJson(response.getBody().toString(), ResponseLeague.class);
+    assertThat(league.id).matches("[0-9a-f-]+");
+    assertThat(league.name).isEqualTo("test123");
+    assertThat(league.startDate).isEqualTo(this.startDate);
+    assertThat(league.endDate).isEqualTo(this.endDate);
+    assertThat(league.managers).hasSize(1);
+    assertThat(league.managers.get(0).displayName).isEqualTo(PRE_REGISTERED_USER1.displayName);
+    assertThat(league.managers.get(0).accountId).isEqualTo(PRE_REGISTERED_USER1.accountId);
+    assertThat(league.managers.get(0).leagueId).isEqualTo(league.id);
+    assertThat(league.managers.get(0).leagueRole).isEqualTo(LeagueRole.OWNER);
+    assertThat(league.managers.get(0).score).isEqualTo(0);
   }
 
   @Test

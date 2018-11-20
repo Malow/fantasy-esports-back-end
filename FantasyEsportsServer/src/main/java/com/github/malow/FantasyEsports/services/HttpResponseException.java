@@ -59,6 +59,14 @@ public class HttpResponseException extends Exception
     }
   }
 
+  public static class IllegalValueException extends HttpResponseException
+  {
+    public IllegalValueException(String badField)
+    {
+      super(HttpStatus.BAD_REQUEST, ErrorCode.ILLEGAL_VALUE, "Illegal value for field: " + badField);
+    }
+  }
+
   public static class MissingMandatoryFieldException extends HttpResponseException
   {
     public MissingMandatoryFieldException(String missingField)

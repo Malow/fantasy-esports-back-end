@@ -11,8 +11,8 @@ import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.AccountNotFoundException;
+import com.github.malow.FantasyEsports.services.account.responses.ResponseManager;
 import com.github.malow.FantasyEsports.services.league.LeagueRole;
-import com.github.malow.FantasyEsports.services.league.Manager;
 import com.github.malow.FantasyEsports.services.league.requests.InviteManagerRequest;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.UserIsAlreadyInvitedToLeagueException;
@@ -46,14 +46,14 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
     assertThat(response.getBody().toString()).isEqualTo("");
 
     response = this.makeGetRequest("/league/" + leagueId + "/manager");
-    List<Manager> managers = GsonSingleton.fromJsonAsList(response.getBody().toString(), Manager[].class);
+    List<ResponseManager> managers = GsonSingleton.fromJsonAsList(response.getBody().toString(), ResponseManager[].class);
     assertThat(managers).hasSize(3);
-    Manager user2Manager = managers.stream().filter(m -> m.getAccountId().equals(PRE_REGISTERED_USER2.accountId)).findAny().get();
-    assertThat(user2Manager.getLeagueRole()).isEqualTo(LeagueRole.INVITED);
-    assertThat(user2Manager.getScore()).isEqualTo(0);
-    Manager user3Manager = managers.stream().filter(m -> m.getAccountId().equals(PRE_REGISTERED_USER3.accountId)).findAny().get();
-    assertThat(user3Manager.getLeagueRole()).isEqualTo(LeagueRole.INVITED);
-    assertThat(user3Manager.getScore()).isEqualTo(0);
+    ResponseManager user2Manager = managers.stream().filter(m -> m.accountId.equals(PRE_REGISTERED_USER2.accountId)).findAny().get();
+    assertThat(user2Manager.leagueRole).isEqualTo(LeagueRole.INVITED);
+    assertThat(user2Manager.score).isEqualTo(0);
+    ResponseManager user3Manager = managers.stream().filter(m -> m.accountId.equals(PRE_REGISTERED_USER3.accountId)).findAny().get();
+    assertThat(user3Manager.leagueRole).isEqualTo(LeagueRole.INVITED);
+    assertThat(user3Manager.score).isEqualTo(0);
   }
 
   @Test

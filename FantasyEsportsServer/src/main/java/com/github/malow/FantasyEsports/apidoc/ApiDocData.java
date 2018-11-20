@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.github.malow.FantasyEsports.apidoc.JsonSchema.JsonSchemaNode;
 import com.github.malow.FantasyEsports.apidoc.JsonSchema.JsonSchemaObject;
@@ -69,14 +70,7 @@ public class ApiDocData
             {
               QueryParameter qp = new QueryParameter();
               qp.name = field.getName();
-              if (field.getType().equals(String.class))
-              {
-                qp.dataType = "string";
-              }
-              else
-              {
-                MaloWLogger.error("Missing mapping");
-              }
+              qp.dataType = getQueryParameterDataTypeForClass(field.getType());
               if (field.getAnnotation(Mandatory.class) != null)
               {
                 qp.required = true;
@@ -84,12 +78,46 @@ public class ApiDocData
               queryParameters.add(qp);
             }
           }
+          List<Parameter> queryAnnotatedParameters = Arrays.stream(method.getParameters()).filter(p -> p.getAnnotation(RequestParam.class) != null)
+              .collect(Collectors.toList());
+          for (Parameter parameter : queryAnnotatedParameters)
+          {
+            QueryParameter qp = new QueryParameter();
+            qp.name = parameter.getAnnotation(RequestParam.class).value();
+            qp.dataType = getQueryParameterDataTypeForClass(parameter.getType());
+            if (parameter.getAnnotation(RequestParam.class).required())
+            {
+              qp.required = true;
+            }
+            queryParameters.add(qp);
+          }
           pathMethodData.queryParameters = queryParameters;
           entityData.addPathMethodData(pathMethod.path, pathMethodData);
         }
       }
       this.data.add(entityData);
     }
+  }
+
+  private static String getQueryParameterDataTypeForClass(Class<?> clazz)
+  {
+    if (clazz.equals(String.class))
+    {
+      return "string";
+    }
+    else if (Enum.class.isAssignableFrom(clazz))
+    {
+      return "string"; // TODO: add the different enum options
+    }
+    else if (Optional.class.equals(clazz))
+    {
+      return "string"; // TODO: God no, RIP
+    }
+    else
+    {
+      MaloWLogger.error("Missing mapping");
+    }
+    return "string";
   }
 
   public static class QueryParameter
@@ -458,6 +486,14 @@ public class ApiDocData
       }
     }
     this.sb = new StringBuffer();
+
+    this.append("openapi: 3.0.1");
+    this.append("info:");
+    this.append("  title: FantasyEsports");
+    this.append("  description: The API description for FantasyEsports");
+    this.append("  version: \"0.2\"");
+    this.append("servers:");
+    this.append("  - url: 'https://malow.duckdns.org:8754'");
     this.append("tags:");
     for (EntityData entity : this.data)
     {
