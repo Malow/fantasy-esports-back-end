@@ -263,9 +263,21 @@ public class ApiDocData
       {
         ResponseData responseData = new ResponseData();
         responseData.httpStatus = entry.getKey();
-        responseData.description = HttpStatus.valueOf(entry.getKey()).name();
         List<String> responseBodies = entry.getValue().stream().map(rr -> rr.response.body).filter(s -> s != null).collect(Collectors.toList());
         responseData.responseBodyJsonSchema = JsonSchema.fromStrings(responseBodies);
+        responseData.description = responseBodies.stream().map(s ->
+        {
+          Matcher matcher = Pattern.compile("\"errorCode\": ?\"([a-z-]*)\"").matcher(s);
+          if (matcher.find())
+          {
+            return matcher.group(1);
+          }
+          return null;
+        }).filter(s -> s != null && !s.isEmpty()).distinct().collect(Collectors.joining(", "));
+        if (responseData.description == null || responseData.description.isEmpty())
+        {
+          responseData.description = HttpStatus.valueOf(entry.getKey()).name();
+        }
         summerizedData.responses.add(responseData);
       }
 
@@ -320,6 +332,7 @@ public class ApiDocData
     public int httpStatus;
     public String description;
     public JsonSchema responseBodyJsonSchema;
+    public List<String> errorCodes = new ArrayList<>();
   }
 
   private static boolean matchPathsHard(String controllerPath, String realDataPath)
@@ -533,7 +546,7 @@ public class ApiDocData
           {
             this.append("      description: " + pathMethodData.description);
           }
-          if (pathMethodData.method.equals("post") && summarizedData.requestBodyJsonSchema != null)
+          if ((pathMethodData.method.equals("post") || pathMethodData.method.equals("patch")) && summarizedData.requestBodyJsonSchema != null)
           {
             this.append("      requestBody:");
             this.append("        content:");

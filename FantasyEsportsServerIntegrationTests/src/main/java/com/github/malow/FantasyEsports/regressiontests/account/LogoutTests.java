@@ -21,7 +21,7 @@ public class LogoutTests extends FantasyEsportsTestFixture
   {
     LoginResponse loginResponse = ConvenienceMethods.login(PRE_REGISTERED_USER1);
 
-    HttpResponse<String> logoutResponse = this.makeGetRequest("/account/logout", ImmutableMap.of("Session-Key", loginResponse.sessionKey));
+    HttpResponse<String> logoutResponse = this.makePostRequest("/account/logout", ImmutableMap.of("Session-Key", loginResponse.sessionKey));
     assertThat(logoutResponse.getStatus()).isEqualTo(200);
 
     CreateLeagueRequest createLeagueRequest = new CreateLeagueRequest("test123", ZonedDateTime.now().plusHours(1), ZonedDateTime.now().plusMonths(1));
@@ -33,7 +33,7 @@ public class LogoutTests extends FantasyEsportsTestFixture
   @Test
   public void testWithBadSession() throws Exception
   {
-    HttpResponse<String> logoutResponse = this.makeGetRequest("/account/logout", ImmutableMap.of("Session-Key", "BadSessionKey"));
+    HttpResponse<String> logoutResponse = this.makePostRequest("/account/logout", ImmutableMap.of("Session-Key", "BadSessionKey"));
 
     this.assertThatResponseEqualsException(logoutResponse, new UnauthorizedException());
   }

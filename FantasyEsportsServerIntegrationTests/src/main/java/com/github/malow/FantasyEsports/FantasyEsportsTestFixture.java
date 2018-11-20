@@ -145,6 +145,11 @@ public class FantasyEsportsTestFixture
     return Unirest.post(Config.HOST + subPath).headers(headers).body(GsonSingleton.toJson(request)).asString();
   }
 
+  protected HttpResponse<String> makePostRequest(String subPath, Map<String, String> headers) throws UnirestException
+  {
+    return Unirest.post(Config.HOST + subPath).headers(headers).asString();
+  }
+
   protected HttpResponse<String> makeGetRequest(String subPath, Map<String, String> headers) throws UnirestException
   {
     return Unirest.get(Config.HOST + subPath).headers(headers).asString();

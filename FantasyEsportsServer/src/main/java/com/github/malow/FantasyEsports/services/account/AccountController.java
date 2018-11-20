@@ -68,7 +68,7 @@ public class AccountController extends Controller
   }
 
   @ApiDoc("Logs a user out")
-  @GetMapping(value = { "/account/logout" })
+  @PostMapping(value = { "/account/logout" })
   public ResponseEntity<String> logout(@RequestHeader(value = "Session-Key", required = false) String sessionKey)
   {
     try

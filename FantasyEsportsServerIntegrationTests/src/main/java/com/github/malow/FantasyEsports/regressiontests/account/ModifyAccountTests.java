@@ -7,6 +7,7 @@ import org.junit.Test;
 import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
+import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
 import com.github.malow.FantasyEsports.services.account.requests.ModifyAccountRequest;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.DisplayNameTakenException;
 import com.github.malow.FantasyEsports.services.account.responses.AccountExceptions.EmailTakenException;
@@ -91,5 +92,15 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
     HttpResponse<String> response = this.makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new DisplayNameTakenException());
+  }
+
+  @Test
+  public void testBadSessionKey() throws Exception
+  {
+    ModifyAccountRequest request = new ModifyAccountRequest(PRE_REGISTERED_USER1.password, "newPass", "newEmail@email.com", "newDisplayName");
+
+    HttpResponse<String> response = this.makePatchRequest("/account", request, ImmutableMap.of("Session-Key", "BadSessionKey"));
+
+    this.assertThatResponseEqualsException(response, new UnauthorizedException());
   }
 }

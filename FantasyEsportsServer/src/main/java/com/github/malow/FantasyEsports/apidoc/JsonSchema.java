@@ -88,7 +88,7 @@ public class JsonSchema
   {
     if (jsons != null && !jsons.isEmpty())
     {
-      return new JsonSchema(jsons);
+      return new JsonSchema(new ArrayList<>(jsons));
     }
     return null;
   }
