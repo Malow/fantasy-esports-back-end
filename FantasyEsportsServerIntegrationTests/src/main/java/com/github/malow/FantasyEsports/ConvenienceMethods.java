@@ -3,12 +3,15 @@ package com.github.malow.FantasyEsports;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture.TestUser;
 import com.github.malow.FantasyEsports.services.account.requests.LoginRequest;
 import com.github.malow.FantasyEsports.services.account.requests.RegisterRequest;
 import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
-import com.github.malow.FantasyEsports.services.league.League;
+import com.github.malow.FantasyEsports.services.account.responses.ResponseLeague;
+import com.github.malow.FantasyEsports.services.account.responses.ResponseManager;
+import com.github.malow.FantasyEsports.services.league.LeagueRole;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
 import com.github.malow.FantasyEsports.services.league.requests.InviteManagerRequest;
 import com.github.malow.malowlib.GsonSingleton;
@@ -41,22 +44,28 @@ public class ConvenienceMethods
     return response;
   }
 
-  public static String createLeague(String name, String sessionKey) throws Exception
+  public static ResponseLeague createLeague(String name, String sessionKey) throws Exception
   {
     return createLeague(name, ZonedDateTime.now().plusHours(1), ZonedDateTime.now().plusMonths(1), sessionKey);
   }
 
-  public static String createLeague(String name, ZonedDateTime startDate, ZonedDateTime endDate, String sessionKey) throws Exception
+  public static ResponseLeague createLeague(String name, ZonedDateTime startDate, ZonedDateTime endDate, String sessionKey) throws Exception
   {
     String responseBody = Unirest.post(Config.HOST + "/league").header("Session-Key", sessionKey)
         .body(GsonSingleton.toJson(new CreateLeagueRequest(name, startDate, endDate))).asJson()
         .getBody().toString();
-    League league = GsonSingleton.fromJson(responseBody, League.class);
-    assertThat(league.getId()).matches("[0-9a-f-]+");
-    assertThat(league.getName()).isEqualTo(name);
-    assertThat(league.getStartDate()).isEqualTo(startDate);
-    assertThat(league.getEndDate()).isEqualTo(endDate);
-    return league.getId();
+    ResponseLeague league = GsonSingleton.fromJson(responseBody, ResponseLeague.class);
+    assertThat(league.id).matches("[0-9a-f-]+");
+    assertThat(league.name).isEqualTo(name);
+    assertThat(league.startDate).isEqualTo(startDate);
+    assertThat(league.endDate).isEqualTo(endDate);
+    assertThat(league.managers).hasSize(1);
+    assertThat(league.managers.get(0).displayName).matches("[0-9a-zA-Z]+");
+    assertThat(league.managers.get(0).accountId).matches("[0-9a-f-]+");
+    assertThat(league.managers.get(0).leagueId).isEqualTo(league.id);
+    assertThat(league.managers.get(0).leagueRole).isEqualTo(LeagueRole.OWNER);
+    assertThat(league.managers.get(0).score).isEqualTo(0);
+    return league;
   }
 
   public static void inviteManager(String leagueId, String sessionKey, String inviteeAccountid) throws Exception
@@ -68,5 +77,30 @@ public class ConvenienceMethods
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(response.getBody().toString()).isEqualTo("");
+  }
+
+  public static ResponseLeague getLeague(String id) throws Exception
+  {
+    HttpResponse<String> response = Unirest.get(Config.HOST + "/league/" + id).asString();
+    assertThat(response.getStatus()).isEqualTo(200);
+    return GsonSingleton.fromJson(response.getBody().toString(), ResponseLeague.class);
+  }
+
+  public static List<ResponseManager> getManagersForLeague(String leagueId) throws Exception
+  {
+    HttpResponse<String> response = Unirest.get(Config.HOST + "/league/" + leagueId + "/manager").asString();
+
+    assertThat(response.getStatus()).isEqualTo(200);
+    List<ResponseManager> managers = GsonSingleton.fromJsonAsList(response.getBody().toString(), ResponseManager[].class);
+    for (ResponseManager manager : managers)
+    {
+      assertThat(manager.id).matches("[0-9a-f-]+");
+      assertThat(manager.displayName).matches("[0-9a-zA-Z]+");
+      assertThat(manager.leagueRole).isNotNull();
+      assertThat(manager.accountId).matches("[0-9a-f-]+");
+      assertThat(manager.leagueId).isEqualTo(leagueId);
+      assertThat(manager.score).isNotNull();
+    }
+    return managers;
   }
 }

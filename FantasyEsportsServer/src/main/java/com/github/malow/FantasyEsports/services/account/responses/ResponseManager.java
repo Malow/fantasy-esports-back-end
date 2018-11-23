@@ -1,7 +1,7 @@
 package com.github.malow.FantasyEsports.services.account.responses;
 
 import com.github.malow.FantasyEsports.services.league.LeagueRole;
-import com.github.malow.FantasyEsports.services.league.Manager;
+import com.github.malow.FantasyEsports.services.manager.Manager;
 
 public class ResponseManager
 {

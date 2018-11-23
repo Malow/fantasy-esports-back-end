@@ -1,6 +1,8 @@
-package com.github.malow.FantasyEsports.services.league;
+package com.github.malow.FantasyEsports.services.manager;
 
 import org.springframework.data.annotation.Id;
+
+import com.github.malow.FantasyEsports.services.league.LeagueRole;
 
 public class Manager
 {
@@ -43,5 +45,10 @@ public class Manager
   public LeagueRole getLeagueRole()
   {
     return this.leagueRole;
+  }
+
+  public void setLeagueRole(LeagueRole leagueRole)
+  {
+    this.leagueRole = leagueRole;
   }
 }

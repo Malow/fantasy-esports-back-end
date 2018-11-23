@@ -26,7 +26,7 @@ public class ListLeaguesTests extends FantasyEsportsTestFixture
   public void testSuccessful() throws Exception
   {
     ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
-    String league2Id = ConvenienceMethods.createLeague("test124", PRE_REGISTERED_USER2.sessionKey); // Other user creates a league that we don't get in response
+    String league2Id = ConvenienceMethods.createLeague("test124", PRE_REGISTERED_USER2.sessionKey).id; // Other user creates a league that we don't get in response
     ConvenienceMethods.inviteManager(league2Id, PRE_REGISTERED_USER2.sessionKey, PRE_REGISTERED_USER1.accountId);
 
     HttpResponse<String> response = this.makeGetRequest("/league", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
@@ -37,7 +37,7 @@ public class ListLeaguesTests extends FantasyEsportsTestFixture
   }
 
   @Test
-  public void testWithBadSessionKey() throws Exception
+  public void testWithBadSession() throws Exception
   {
     ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
 
@@ -50,7 +50,7 @@ public class ListLeaguesTests extends FantasyEsportsTestFixture
   public void testFilterByRoleSuccessful() throws Exception
   {
     ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
-    String league2Id = ConvenienceMethods.createLeague("test124", PRE_REGISTERED_USER2.sessionKey);
+    String league2Id = ConvenienceMethods.createLeague("test124", PRE_REGISTERED_USER2.sessionKey).id;
     ConvenienceMethods.inviteManager(league2Id, PRE_REGISTERED_USER2.sessionKey, PRE_REGISTERED_USER1.accountId);
 
     HttpResponse<String> responseOwner = this.makeGetRequest("/league?role=OWNER", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));

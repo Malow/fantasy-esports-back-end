@@ -19,7 +19,7 @@ public class GetManagersTests extends FantasyEsportsTestFixture
   @Test
   public void testSuccessful() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
+    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
 
     HttpResponse<String> response = this.makeGetRequest("/league/" + leagueId + "/manager");
 

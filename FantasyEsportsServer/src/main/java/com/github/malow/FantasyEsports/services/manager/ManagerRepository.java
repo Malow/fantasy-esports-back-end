@@ -1,4 +1,4 @@
-package com.github.malow.FantasyEsports.services.league;
+package com.github.malow.FantasyEsports.services.manager;
 
 import java.util.List;
 

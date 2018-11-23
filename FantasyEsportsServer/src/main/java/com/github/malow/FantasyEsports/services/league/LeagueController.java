@@ -28,6 +28,8 @@ import com.github.malow.FantasyEsports.services.account.responses.ResponseManage
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
 import com.github.malow.FantasyEsports.services.league.requests.InviteManagerRequest;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
+import com.github.malow.FantasyEsports.services.manager.Manager;
+import com.github.malow.FantasyEsports.services.manager.ManagerService;
 import com.github.malow.malowlib.GsonSingleton;
 
 @ApiDoc("Represents leagues")
@@ -41,6 +43,8 @@ public class LeagueController extends Controller
   private AccountService accountService;
   @Autowired
   private LeagueService leagueService;
+  @Autowired
+  private ManagerService managerService;
 
   @ApiDoc("Lists all leagues that the logged in user is related to")
   @GetMapping(value = { "/league" })
@@ -128,7 +132,7 @@ public class LeagueController extends Controller
       List<ResponseManager> responseManagers = new ArrayList<>();
       for (Manager manager : this.leagueService.getManagersForLeague(leagueId))
       {
-        responseManagers.add(this.convertToResponseManager(manager));
+        responseManagers.add(this.managerService.convertToResponseManager(manager));
       }
       return ResponseEntity.ok(GsonSingleton.toJson(responseManagers));
     }
@@ -166,14 +170,8 @@ public class LeagueController extends Controller
     List<ResponseManager> responseManagers = new ArrayList<>();
     for (Manager manager : this.leagueService.getManagersForLeague(league))
     {
-      responseManagers.add(this.convertToResponseManager(manager));
+      responseManagers.add(this.managerService.convertToResponseManager(manager));
     }
     return new ResponseLeague(league, responseManagers);
-  }
-
-  private ResponseManager convertToResponseManager(Manager manager) throws AccountNotFoundException
-  {
-    Account account = this.accountService.getAccount(manager.getAccountId());
-    return new ResponseManager(manager, account.getDisplayName());
   }
 }

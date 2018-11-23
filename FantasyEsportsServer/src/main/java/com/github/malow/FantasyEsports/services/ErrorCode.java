@@ -9,12 +9,15 @@ public enum ErrorCode
   BADLY_FORMED_JSON("badly-formed-json"),
   MISSING_MANDATORY_FIELD("missing-mandatory-field"),
   UNAUTHORIZED("unauthorized"),
+  FORBIDDEN("forbidden"),
   LEAGUE_NAME_EXISTS("league-name-exists"),
   LEAGUE_DOES_NOT_EXIST("league-does-not-exist"),
   ACCOUNT_NOT_FOUND("account-not-found"),
   USER_ALREADY_MEMBER_IN_LEAGUE("user-already-member-in-league"),
   USER_ALREADY_INVITED_TO_LEAGUE("user-already-invited-to-league"),
-  ILLEGAL_VALUE("illegal-value");
+  ILLEGAL_VALUE("illegal-value"),
+  MANAGER_DOES_NOT_EXIST("manager-does-not-exist"),
+  NO_CHANGE_MADE("no-change-made");
 
   private final String errorCode;
 

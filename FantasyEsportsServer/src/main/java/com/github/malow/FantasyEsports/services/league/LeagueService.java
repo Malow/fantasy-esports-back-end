@@ -7,15 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.github.malow.FantasyEsports.services.HttpResponseException;
-import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
+import com.github.malow.FantasyEsports.services.HttpResponseException.ForbiddenException;
 import com.github.malow.FantasyEsports.services.account.Account;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.CreateNameTakenException;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.NoLeagueFoundException;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.UserIsAlreadyInvitedToLeagueException;
 import com.github.malow.FantasyEsports.services.league.responses.LeagueExceptions.UserIsAlreadyMemberInLeagueException;
+import com.github.malow.FantasyEsports.services.manager.Manager;
+import com.github.malow.FantasyEsports.services.manager.ManagerRepository;
 
-@Component("LeagueServiceBeanName")
+@Component
 public class LeagueService
 {
   @Autowired
@@ -58,13 +60,13 @@ public class LeagueService
   }
 
   public void inviteManager(Account inviteeAccount, String leagueId, Account inviterAccount)
-      throws NoLeagueFoundException, UserIsAlreadyMemberInLeagueException, UnauthorizedException, UserIsAlreadyInvitedToLeagueException
+      throws NoLeagueFoundException, UserIsAlreadyMemberInLeagueException, UserIsAlreadyInvitedToLeagueException, ForbiddenException
   {
     League league = this.getLeague(leagueId);
     List<Manager> managers = this.getManagersForLeague(league);
     if (!managers.stream().anyMatch(m -> m.getAccountId().equals(inviterAccount.getId()) && m.getLeagueRole().equals(LeagueRole.OWNER)))
     {
-      throw new UnauthorizedException();
+      throw new ForbiddenException();
     }
     Optional<Manager> existingManager = managers.stream().filter(m -> m.getAccountId().equals(inviteeAccount.getId())).findFirst();
     if (existingManager.isPresent())

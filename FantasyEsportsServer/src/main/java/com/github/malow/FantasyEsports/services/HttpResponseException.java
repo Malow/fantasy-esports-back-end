@@ -79,7 +79,23 @@ public class HttpResponseException extends Exception
   {
     public UnauthorizedException()
     {
-      super(HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHORIZED, "You do not have permission to do that");
+      super(HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHORIZED, "You're missing authorization");
+    }
+  }
+
+  public static class ForbiddenException extends HttpResponseException
+  {
+    public ForbiddenException()
+    {
+      super(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "You do not have permission to do that");
+    }
+  }
+
+  public static class NoChangeMadeException extends HttpResponseException
+  {
+    public NoChangeMadeException()
+    {
+      super(HttpStatus.BAD_REQUEST, ErrorCode.NO_CHANGE_MADE, "No change was made");
     }
   }
 }
