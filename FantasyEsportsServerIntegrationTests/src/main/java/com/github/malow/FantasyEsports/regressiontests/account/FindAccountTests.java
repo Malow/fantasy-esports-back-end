@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.FantasyEsports.services.account.responses.FindAccountResponse;
@@ -22,10 +21,10 @@ public class FindAccountTests extends FantasyEsportsTestFixture
   @Test
   public void testSingleSuccessful() throws Exception
   {
-    this.user1.accountId = ConvenienceMethods.register(this.user1).accountId;
-    ConvenienceMethods.register(this.user2);
+    this.user1.accountId = register(this.user1).accountId;
+    register(this.user2);
 
-    HttpResponse<String> response = this.makeGetRequest("/account/find?displayName=FirstGuy");
+    HttpResponse<String> response = makeGetRequest("/account/find?displayName=FirstGuy");
 
     assertThat(response.getStatus()).isEqualTo(200);
     FindAccountResponse responseObject = GsonSingleton.fromJson(response.getBody().toString(), FindAccountResponse.class);
@@ -39,10 +38,10 @@ public class FindAccountTests extends FantasyEsportsTestFixture
   @Test
   public void testMultipleSuccessful() throws Exception
   {
-    ConvenienceMethods.register(this.user1);
-    ConvenienceMethods.register(this.user2);
+    register(this.user1);
+    register(this.user2);
 
-    HttpResponse<String> response = this.makeGetRequest("/account/find?displayName=Guy");
+    HttpResponse<String> response = makeGetRequest("/account/find?displayName=Guy");
 
     assertThat(response.getStatus()).isEqualTo(200);
     FindAccountResponse responseObject = GsonSingleton.fromJson(response.getBody().toString(), FindAccountResponse.class);
@@ -54,10 +53,10 @@ public class FindAccountTests extends FantasyEsportsTestFixture
   @Test
   public void testNoneSuccessful() throws Exception
   {
-    ConvenienceMethods.register(this.user1);
-    ConvenienceMethods.register(this.user2);
+    register(this.user1);
+    register(this.user2);
 
-    HttpResponse<String> response = this.makeGetRequest("/account/find?displayName=DisplayNameThatIsNotFound");
+    HttpResponse<String> response = makeGetRequest("/account/find?displayName=DisplayNameThatIsNotFound");
 
     assertThat(response.getStatus()).isEqualTo(200);
     FindAccountResponse responseObject = GsonSingleton.fromJson(response.getBody().toString(), FindAccountResponse.class);
@@ -67,14 +66,14 @@ public class FindAccountTests extends FantasyEsportsTestFixture
   @Test
   public void testWithoutParameter() throws Exception
   {
-    ConvenienceMethods.register(this.user1);
-    ConvenienceMethods.register(this.user2);
+    register(this.user1);
+    register(this.user2);
 
-    HttpResponse<String> response = this.makeGetRequest("/account/find");
+    HttpResponse<String> response = makeGetRequest("/account/find");
 
     this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("displayName"));
 
-    response = this.makeGetRequest("/account/find?displayName=");
+    response = makeGetRequest("/account/find?displayName=");
 
     this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("displayName"));
   }

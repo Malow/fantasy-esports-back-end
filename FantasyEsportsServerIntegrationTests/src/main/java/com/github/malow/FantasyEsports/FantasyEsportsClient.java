@@ -14,34 +14,34 @@ import com.github.malow.FantasyEsports.services.account.responses.ResponseManage
 import com.github.malow.FantasyEsports.services.league.LeagueRole;
 import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
 import com.github.malow.FantasyEsports.services.league.requests.InviteManagerRequest;
+import com.github.malow.FantasyEsports.services.manager.requests.ModifyManagerRequest;
 import com.github.malow.malowlib.GsonSingleton;
 import com.google.common.collect.ImmutableMap;
 import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
 
-public class ConvenienceMethods
+public class FantasyEsportsClient extends HttpClient
 {
+
   public static LoginResponse login(TestUser user) throws Exception
   {
-    String responseBody = Unirest.post(Config.HOST + "/account/login").body(GsonSingleton.toJson(new LoginRequest(user.email, user.password)))
-        .asJson().getBody()
-        .toString();
-    LoginResponse response = GsonSingleton.fromJson(responseBody, LoginResponse.class);
-    assertThat(response.sessionKey).matches("[0-9a-f-]+");
-    assertThat(response.accountId).matches("[0-9a-f-]+");
-    return response;
+    HttpResponse<String> response = makePostRequest("/account/login", new LoginRequest(user.email, user.password));
+
+    assertThat(response.getStatus()).isEqualTo(200);
+    LoginResponse loginResponse = GsonSingleton.fromJson(response.getBody().toString(), LoginResponse.class);
+    assertThat(loginResponse.sessionKey).matches("[0-9a-f-]+");
+    assertThat(loginResponse.accountId).matches("[0-9a-f-]+");
+    return loginResponse;
   }
 
   public static LoginResponse register(TestUser user) throws Exception
   {
-    String responseBody = Unirest.post(Config.HOST + "/account/register")
-        .body(GsonSingleton.toJson(new RegisterRequest(user.email, user.displayName, user.password))).asJson().getBody()
-        .toString();
+    HttpResponse<String> response = makePostRequest("/account/register", new RegisterRequest(user.email, user.displayName, user.password));
 
-    LoginResponse response = GsonSingleton.fromJson(responseBody, LoginResponse.class);
-    assertThat(response.sessionKey).matches("[0-9a-f-]+");
-    assertThat(response.accountId).matches("[0-9a-f-]+");
-    return response;
+    assertThat(response.getStatus()).isEqualTo(200);
+    LoginResponse loginResponse = GsonSingleton.fromJson(response.getBody().toString(), LoginResponse.class);
+    assertThat(loginResponse.sessionKey).matches("[0-9a-f-]+");
+    assertThat(loginResponse.accountId).matches("[0-9a-f-]+");
+    return loginResponse;
   }
 
   public static ResponseLeague createLeague(String name, String sessionKey) throws Exception
@@ -51,10 +51,11 @@ public class ConvenienceMethods
 
   public static ResponseLeague createLeague(String name, ZonedDateTime startDate, ZonedDateTime endDate, String sessionKey) throws Exception
   {
-    String responseBody = Unirest.post(Config.HOST + "/league").header("Session-Key", sessionKey)
-        .body(GsonSingleton.toJson(new CreateLeagueRequest(name, startDate, endDate))).asJson()
-        .getBody().toString();
-    ResponseLeague league = GsonSingleton.fromJson(responseBody, ResponseLeague.class);
+    HttpResponse<String> response = makePostRequest("/league", new CreateLeagueRequest(name, startDate, endDate),
+        ImmutableMap.of("Session-Key", sessionKey));
+
+    assertThat(response.getStatus()).isEqualTo(200);
+    ResponseLeague league = GsonSingleton.fromJson(response.getBody().toString(), ResponseLeague.class);
     assertThat(league.id).matches("[0-9a-f-]+");
     assertThat(league.name).isEqualTo(name);
     assertThat(league.startDate).isEqualTo(startDate);
@@ -72,8 +73,7 @@ public class ConvenienceMethods
   {
     InviteManagerRequest request = new InviteManagerRequest(inviteeAccountid);
 
-    HttpResponse<String> response = Unirest.post(Config.HOST + "/league/" + leagueId + "/manager").headers(ImmutableMap.of("Session-Key", sessionKey))
-        .body(GsonSingleton.toJson(request)).asString();
+    HttpResponse<String> response = makePostRequest("/league/" + leagueId + "/manager", request, ImmutableMap.of("Session-Key", sessionKey));
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(response.getBody().toString()).isEqualTo("");
@@ -81,14 +81,14 @@ public class ConvenienceMethods
 
   public static ResponseLeague getLeague(String id) throws Exception
   {
-    HttpResponse<String> response = Unirest.get(Config.HOST + "/league/" + id).asString();
+    HttpResponse<String> response = makeGetRequest("/league/" + id);
     assertThat(response.getStatus()).isEqualTo(200);
     return GsonSingleton.fromJson(response.getBody().toString(), ResponseLeague.class);
   }
 
   public static List<ResponseManager> getManagersForLeague(String leagueId) throws Exception
   {
-    HttpResponse<String> response = Unirest.get(Config.HOST + "/league/" + leagueId + "/manager").asString();
+    HttpResponse<String> response = makeGetRequest("/league/" + leagueId + "/manager");
 
     assertThat(response.getStatus()).isEqualTo(200);
     List<ResponseManager> managers = GsonSingleton.fromJsonAsList(response.getBody().toString(), ResponseManager[].class);
@@ -103,4 +103,18 @@ public class ConvenienceMethods
     }
     return managers;
   }
+
+  public static void acceptInvite(String leagueId, String sessionKey, String inviteeAccountid) throws Exception
+  {
+    ResponseManager inviteeManager = getManagersForLeague(leagueId).stream()
+        .filter(m -> m.accountId.equals(inviteeAccountid)).findFirst().get();
+    ModifyManagerRequest request = new ModifyManagerRequest(LeagueRole.MEMBER);
+
+    HttpResponse<String> response = makePatchRequest("/manager/" + inviteeManager.id, request,
+        ImmutableMap.of("Session-Key", sessionKey));
+
+    assertThat(response.getStatus()).isEqualTo(200);
+    assertThat(response.getBody().toString()).isEqualTo("");
+  }
+
 }

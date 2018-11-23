@@ -6,7 +6,6 @@ import java.time.ZonedDateTime;
 
 import org.junit.Test;
 
-import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.account.responses.ResponseLeague;
 import com.github.malow.FantasyEsports.services.league.LeagueRole;
@@ -22,9 +21,9 @@ public class GetLeagueTests extends FantasyEsportsTestFixture
   @Test
   public void testSuccessful() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", this.startDate, this.endDate, PRE_REGISTERED_USER1.sessionKey).id;
+    String leagueId = createLeague("test123", this.startDate, this.endDate, PRE_REGISTERED_USER1.sessionKey).id;
 
-    HttpResponse<String> response = this.makeGetRequest("/league/" + leagueId);
+    HttpResponse<String> response = makeGetRequest("/league/" + leagueId);
 
     assertThat(response.getStatus()).isEqualTo(200);
     ResponseLeague league = GsonSingleton.fromJson(response.getBody().toString(), ResponseLeague.class);
@@ -43,7 +42,7 @@ public class GetLeagueTests extends FantasyEsportsTestFixture
   @Test
   public void testNoLeagueFound() throws Exception
   {
-    HttpResponse<String> response = this.makeGetRequest("/league/" + "badLeagueId");
+    HttpResponse<String> response = makeGetRequest("/league/" + "badLeagueId");
 
     this.assertThatResponseEqualsException(response, new NoLeagueFoundException());
   }

@@ -17,7 +17,7 @@ public class GetAccountTests extends FantasyEsportsTestFixture
   @Test
   public void testOwnSuccessful() throws Exception
   {
-    HttpResponse<String> response = this.makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+    HttpResponse<String> response = makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     assertThat(response.getStatus()).isEqualTo(200);
     ResponseAccount responseObject = GsonSingleton.fromJson(response.getBody().toString(), ResponseAccount.class);
@@ -29,7 +29,7 @@ public class GetAccountTests extends FantasyEsportsTestFixture
   @Test
   public void testOwnWithBadSessionKey() throws Exception
   {
-    HttpResponse<String> response = this.makeGetRequest("/account", ImmutableMap.of("Session-Key", "badSessionKey"));
+    HttpResponse<String> response = makeGetRequest("/account", ImmutableMap.of("Session-Key", "badSessionKey"));
 
     this.assertThatResponseEqualsException(response, new UnauthorizedException());
   }
@@ -37,7 +37,7 @@ public class GetAccountTests extends FantasyEsportsTestFixture
   @Test
   public void testOtherSuccessful() throws Exception
   {
-    HttpResponse<String> response = this.makeGetRequest("/account/" + PRE_REGISTERED_USER2.accountId);
+    HttpResponse<String> response = makeGetRequest("/account/" + PRE_REGISTERED_USER2.accountId);
 
     assertThat(response.getStatus()).isEqualTo(200);
     ResponseAccount responseObject = GsonSingleton.fromJson(response.getBody().toString(), ResponseAccount.class);
@@ -49,7 +49,7 @@ public class GetAccountTests extends FantasyEsportsTestFixture
   @Test
   public void testNoAccountFound() throws Exception
   {
-    HttpResponse<String> response = this.makeGetRequest("/account/badAccountId");
+    HttpResponse<String> response = makeGetRequest("/account/badAccountId");
 
     this.assertThatResponseEqualsException(response, new AccountNotFoundException());
   }

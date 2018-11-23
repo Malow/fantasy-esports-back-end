@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.account.responses.ResponseManager;
 import com.github.malow.FantasyEsports.services.league.LeagueRole;
@@ -19,9 +18,9 @@ public class GetManagersTests extends FantasyEsportsTestFixture
   @Test
   public void testSuccessful() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
+    String leagueId = createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
 
-    HttpResponse<String> response = this.makeGetRequest("/league/" + leagueId + "/manager");
+    HttpResponse<String> response = makeGetRequest("/league/" + leagueId + "/manager");
 
     assertThat(response.getStatus()).isEqualTo(200);
     List<ResponseManager> managers = GsonSingleton.fromJsonAsList(response.getBody().toString(), ResponseManager[].class);
@@ -36,7 +35,7 @@ public class GetManagersTests extends FantasyEsportsTestFixture
   @Test
   public void testNoLeagueFound() throws Exception
   {
-    HttpResponse<String> response = this.makeGetRequest("/league/badLeagueId/manager");
+    HttpResponse<String> response = makeGetRequest("/league/badLeagueId/manager");
 
     this.assertThatResponseEqualsException(response, new NoLeagueFoundException());
   }

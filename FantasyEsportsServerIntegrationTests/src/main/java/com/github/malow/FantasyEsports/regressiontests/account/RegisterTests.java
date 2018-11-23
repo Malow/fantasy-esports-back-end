@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.FantasyEsports.services.account.requests.RegisterRequest;
@@ -21,7 +20,7 @@ public class RegisterTests extends FantasyEsportsTestFixture
   {
     RegisterRequest request = new RegisterRequest("tester123@test.com", "tester123", "tester123pw");
 
-    HttpResponse<String> httpResponse = this.makePostRequest("/account/register", request);
+    HttpResponse<String> httpResponse = makePostRequest("/account/register", request);
 
     assertThat(httpResponse.getStatus()).isEqualTo(200);
     LoginResponse response = GsonSingleton.fromJson(httpResponse.getBody().toString(), LoginResponse.class);
@@ -33,25 +32,25 @@ public class RegisterTests extends FantasyEsportsTestFixture
   public void testMandatoryParameters() throws Exception
   {
     RegisterRequest request = new RegisterRequest(null, "tester123", "tester123pw");
-    HttpResponse<String> response = this.makePostRequest("/account/register", request);
+    HttpResponse<String> response = makePostRequest("/account/register", request);
     this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("email"));
 
     request = new RegisterRequest("tester123@test.com", null, "tester123pw");
-    response = this.makePostRequest("/account/register", request);
+    response = makePostRequest("/account/register", request);
     this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("displayName"));
 
     request = new RegisterRequest("tester123@test.com", "tester123", null);
-    response = this.makePostRequest("/account/register", request);
+    response = makePostRequest("/account/register", request);
     this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("password"));
   }
 
   @Test
   public void testEmailInUse() throws Exception
   {
-    ConvenienceMethods.register(new TestUser("tester123@test.com", "tester123", "tester123pw"));
+    register(new TestUser("tester123@test.com", "tester123", "tester123pw"));
     RegisterRequest request = new RegisterRequest("tester123@test.com", "tester123", "tester123pw");
 
-    HttpResponse<String> response = this.makePostRequest("/account/register", request);
+    HttpResponse<String> response = makePostRequest("/account/register", request);
 
     this.assertThatResponseEqualsException(response, new EmailTakenException());
   }
@@ -59,10 +58,10 @@ public class RegisterTests extends FantasyEsportsTestFixture
   @Test
   public void testDisplayNameInUse() throws Exception
   {
-    ConvenienceMethods.register(new TestUser("tester123@test.com", "tester123", "tester123pw"));
+    register(new TestUser("tester123@test.com", "tester123", "tester123pw"));
     RegisterRequest request = new RegisterRequest("tester124@test.com", "tester123", "tester123pw");
 
-    HttpResponse<String> response = this.makePostRequest("/account/register", request);
+    HttpResponse<String> response = makePostRequest("/account/register", request);
 
     this.assertThatResponseEqualsException(response, new DisplayNameTakenException());
   }

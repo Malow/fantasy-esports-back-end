@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.HttpResponseException.ForbiddenException;
 import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
@@ -21,18 +20,16 @@ import com.github.malow.FantasyEsports.services.league.responses.LeagueException
 import com.github.malow.malowlib.GsonSingleton;
 import com.google.common.collect.ImmutableMap;
 import com.mashape.unirest.http.HttpResponse;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
 
 public class InviteManagerTests extends FantasyEsportsTestFixture
 {
   @Test
   public void testSuccessful() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
+    String leagueId = createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
     InviteManagerRequest request = new InviteManagerRequest(PRE_REGISTERED_USER2.accountId);
 
-    HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+    HttpResponse<String> response = makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     assertThat(response.getStatus()).isEqualTo(200);
@@ -40,13 +37,13 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
 
     request = new InviteManagerRequest(PRE_REGISTERED_USER3.accountId);
 
-    response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+    response = makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(response.getBody().toString()).isEqualTo("");
 
-    response = this.makeGetRequest("/league/" + leagueId + "/manager");
+    response = makeGetRequest("/league/" + leagueId + "/manager");
     List<ResponseManager> managers = GsonSingleton.fromJsonAsList(response.getBody().toString(), ResponseManager[].class);
     assertThat(managers).hasSize(3);
     ResponseManager user2Manager = managers.stream().filter(m -> m.accountId.equals(PRE_REGISTERED_USER2.accountId)).findAny().get();
@@ -60,10 +57,10 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
   @Test
   public void testMandatoryParameters() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
+    String leagueId = createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
     InviteManagerRequest request = new InviteManagerRequest(null);
 
-    HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+    HttpResponse<String> response = makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("inviteeAccountId"));
@@ -73,10 +70,10 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
   @Test
   public void testWithBadSession() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
+    String leagueId = createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
     InviteManagerRequest request = new InviteManagerRequest(PRE_REGISTERED_USER2.accountId);
 
-    HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+    HttpResponse<String> response = makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", "BadSessionKey"));
 
     this.assertThatResponseEqualsException(response, new UnauthorizedException());
@@ -87,7 +84,7 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
   {
     InviteManagerRequest request = new InviteManagerRequest(PRE_REGISTERED_USER2.accountId);
 
-    HttpResponse<String> response = this.makePostRequest("/league/badLeagueId/manager", request,
+    HttpResponse<String> response = makePostRequest("/league/badLeagueId/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new NoLeagueFoundException());
@@ -96,10 +93,10 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
   @Test
   public void testInviteNonexistentUser() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
+    String leagueId = createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
     InviteManagerRequest request = new InviteManagerRequest("badAccountId");
 
-    HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+    HttpResponse<String> response = makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new AccountNotFoundException());
@@ -108,10 +105,10 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
   @Test
   public void testInviteSelf() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
+    String leagueId = createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
     InviteManagerRequest request = new InviteManagerRequest(PRE_REGISTERED_USER1.accountId);
 
-    HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+    HttpResponse<String> response = makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new UserIsAlreadyMemberInLeagueException());
@@ -120,11 +117,11 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
   @Test
   public void testInviteTwice() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
-    ConvenienceMethods.inviteManager(leagueId, PRE_REGISTERED_USER1.sessionKey, PRE_REGISTERED_USER2.accountId);
+    String leagueId = createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
+    inviteManager(leagueId, PRE_REGISTERED_USER1.sessionKey, PRE_REGISTERED_USER2.accountId);
     InviteManagerRequest request = new InviteManagerRequest(PRE_REGISTERED_USER2.accountId);
 
-    HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+    HttpResponse<String> response = makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new UserIsAlreadyInvitedToLeagueException());
@@ -133,14 +130,12 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
   @Test
   public void testInviteAlreadyMember() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
-    ConvenienceMethods.inviteManager(leagueId, PRE_REGISTERED_USER1.sessionKey, PRE_REGISTERED_USER2.accountId);
-    //TODO: replace with normal way to accept invite
-    database.getCollection("manager").updateOne(Filters.eq("accountId", PRE_REGISTERED_USER2.accountId),
-        Updates.set("leagueRole", LeagueRole.MEMBER.name()));
+    String leagueId = createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
+    inviteManager(leagueId, PRE_REGISTERED_USER1.sessionKey, PRE_REGISTERED_USER2.accountId);
+    acceptInvite(leagueId, PRE_REGISTERED_USER2.sessionKey, PRE_REGISTERED_USER2.accountId);
     InviteManagerRequest request = new InviteManagerRequest(PRE_REGISTERED_USER2.accountId);
 
-    HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+    HttpResponse<String> response = makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new UserIsAlreadyMemberInLeagueException());
@@ -149,10 +144,10 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
   @Test
   public void testInviteAsNonMember() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
+    String leagueId = createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
     InviteManagerRequest request = new InviteManagerRequest(PRE_REGISTERED_USER3.accountId);
 
-    HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+    HttpResponse<String> response = makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER2.sessionKey));
 
     this.assertThatResponseEqualsException(response, new ForbiddenException());
@@ -161,11 +156,11 @@ public class InviteManagerTests extends FantasyEsportsTestFixture
   @Test
   public void testInviteAsNonOwner() throws Exception
   {
-    String leagueId = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
-    ConvenienceMethods.inviteManager(leagueId, PRE_REGISTERED_USER1.sessionKey, PRE_REGISTERED_USER2.accountId);
+    String leagueId = createLeague("test123", PRE_REGISTERED_USER1.sessionKey).id;
+    inviteManager(leagueId, PRE_REGISTERED_USER1.sessionKey, PRE_REGISTERED_USER2.accountId);
     InviteManagerRequest request = new InviteManagerRequest(PRE_REGISTERED_USER3.accountId);
 
-    HttpResponse<String> response = this.makePostRequest("/league/" + leagueId + "/manager", request,
+    HttpResponse<String> response = makePostRequest("/league/" + leagueId + "/manager", request,
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER2.sessionKey));
 
     this.assertThatResponseEqualsException(response, new ForbiddenException());

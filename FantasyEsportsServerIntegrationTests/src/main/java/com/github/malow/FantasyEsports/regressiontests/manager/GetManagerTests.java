@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.account.responses.ResponseLeague;
 import com.github.malow.FantasyEsports.services.account.responses.ResponseManager;
@@ -18,9 +17,9 @@ public class GetManagerTests extends FantasyEsportsTestFixture
   @Test
   public void testSuccessful() throws Exception
   {
-    ResponseLeague league = ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
+    ResponseLeague league = createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
 
-    HttpResponse<String> response = this.makeGetRequest("/manager/" + league.managers.get(0).id);
+    HttpResponse<String> response = makeGetRequest("/manager/" + league.managers.get(0).id);
 
     assertThat(response.getStatus()).isEqualTo(200);
     ResponseManager manager = GsonSingleton.fromJson(response.getBody().toString(), ResponseManager.class);
@@ -35,7 +34,7 @@ public class GetManagerTests extends FantasyEsportsTestFixture
   @Test
   public void testNoManagerFound() throws Exception
   {
-    HttpResponse<String> response = this.makeGetRequest("/manager/" + "badManagerId");
+    HttpResponse<String> response = makeGetRequest("/manager/" + "badManagerId");
 
     this.assertThatResponseEqualsException(response, new NoManagerFoundException());
   }

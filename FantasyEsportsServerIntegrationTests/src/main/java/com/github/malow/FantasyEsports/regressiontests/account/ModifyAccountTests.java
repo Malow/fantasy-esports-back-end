@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.HttpResponseException.MissingMandatoryFieldException;
 import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
@@ -24,24 +23,24 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
   {
     ModifyAccountRequest request = new ModifyAccountRequest(PRE_REGISTERED_USER1.password, "newPass", "newEmail@email.com", "newDisplayName");
 
-    HttpResponse<String> response = this.makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+    HttpResponse<String> response = makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(response.getBody().toString()).isEqualTo("");
     ResponseAccount getResponse = GsonSingleton.fromJson(
-        this.makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey)).getBody().toString(),
+        makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey)).getBody().toString(),
         ResponseAccount.class);
     assertThat(getResponse.displayName).isEqualTo("newDisplayName");
     assertThat(getResponse.email).isEqualTo("newEmail@email.com");
     assertThat(getResponse.accountId).isEqualTo(PRE_REGISTERED_USER1.accountId);
-    ConvenienceMethods.login(new TestUser("newEmail@email.com", null, "newPass"));
+    login(new TestUser("newEmail@email.com", null, "newPass"));
   }
 
   @Test
   public void testMandatoryParameters() throws Exception
   {
     ModifyAccountRequest request = new ModifyAccountRequest(null, "newPass", "newEmail@email.com", "newDisplayName");
-    HttpResponse<String> response = this.makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+    HttpResponse<String> response = makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
     this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("currentPassword"));
   }
 
@@ -50,17 +49,17 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
   {
     ModifyAccountRequest request = new ModifyAccountRequest(PRE_REGISTERED_USER1.password, null, null, "newDisplayName");
 
-    HttpResponse<String> response = this.makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+    HttpResponse<String> response = makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     assertThat(response.getStatus()).isEqualTo(200);
     assertThat(response.getBody().toString()).isEqualTo("");
     ResponseAccount getResponse = GsonSingleton.fromJson(
-        this.makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey)).getBody().toString(),
+        makeGetRequest("/account", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey)).getBody().toString(),
         ResponseAccount.class);
     assertThat(getResponse.displayName).isEqualTo("newDisplayName");
     assertThat(getResponse.email).isEqualTo(PRE_REGISTERED_USER1.email);
     assertThat(getResponse.accountId).isEqualTo(PRE_REGISTERED_USER1.accountId);
-    ConvenienceMethods.login(PRE_REGISTERED_USER1);
+    login(PRE_REGISTERED_USER1);
   }
 
   @Test
@@ -68,7 +67,7 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
   {
     ModifyAccountRequest request = new ModifyAccountRequest("badPass", "newPass", "newEmail@email.com", "newDisplayName");
 
-    HttpResponse<String> response = this.makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+    HttpResponse<String> response = makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new WrongPasswordException());
   }
@@ -78,7 +77,7 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
   {
     ModifyAccountRequest request = new ModifyAccountRequest(PRE_REGISTERED_USER1.password, "newPass", PRE_REGISTERED_USER2.email, "newDisplayName");
 
-    HttpResponse<String> response = this.makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+    HttpResponse<String> response = makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new EmailTakenException());
   }
@@ -89,7 +88,7 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
     ModifyAccountRequest request = new ModifyAccountRequest(PRE_REGISTERED_USER1.password, "newPass", "newEmail@email.com",
         PRE_REGISTERED_USER2.displayName);
 
-    HttpResponse<String> response = this.makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+    HttpResponse<String> response = makePatchRequest("/account", request, ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new DisplayNameTakenException());
   }
@@ -99,7 +98,7 @@ public class ModifyAccountTests extends FantasyEsportsTestFixture
   {
     ModifyAccountRequest request = new ModifyAccountRequest(PRE_REGISTERED_USER1.password, "newPass", "newEmail@email.com", "newDisplayName");
 
-    HttpResponse<String> response = this.makePatchRequest("/account", request, ImmutableMap.of("Session-Key", "BadSessionKey"));
+    HttpResponse<String> response = makePatchRequest("/account", request, ImmutableMap.of("Session-Key", "BadSessionKey"));
 
     this.assertThatResponseEqualsException(response, new UnauthorizedException());
   }

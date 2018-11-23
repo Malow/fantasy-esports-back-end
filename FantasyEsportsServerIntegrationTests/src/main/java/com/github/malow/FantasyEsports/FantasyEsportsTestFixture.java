@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -17,13 +16,10 @@ import org.junit.Before;
 import org.slf4j.LoggerFactory;
 
 import com.github.malow.FantasyEsports.services.HttpResponseException;
-import com.github.malow.FantasyEsports.services.Request;
 import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
-import com.github.malow.malowlib.GsonSingleton;
 import com.github.malow.malowlib.MaloWLogger;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
@@ -31,7 +27,7 @@ import com.mongodb.client.MongoDatabase;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 
-public class FantasyEsportsTestFixture
+public class FantasyEsportsTestFixture extends FantasyEsportsClient
 {
   public static class TestUser
   {
@@ -114,50 +110,15 @@ public class FantasyEsportsTestFixture
 
   private void preRegisterAccounts() throws Exception
   {
-    LoginResponse response = ConvenienceMethods.register(PRE_REGISTERED_USER1);
+    LoginResponse response = register(PRE_REGISTERED_USER1);
     PRE_REGISTERED_USER1.sessionKey = response.sessionKey;
     PRE_REGISTERED_USER1.accountId = response.accountId;
-    response = ConvenienceMethods.register(PRE_REGISTERED_USER2);
+    response = register(PRE_REGISTERED_USER2);
     PRE_REGISTERED_USER2.sessionKey = response.sessionKey;
     PRE_REGISTERED_USER2.accountId = response.accountId;
-    response = ConvenienceMethods.register(PRE_REGISTERED_USER3);
+    response = register(PRE_REGISTERED_USER3);
     PRE_REGISTERED_USER3.sessionKey = response.sessionKey;
     PRE_REGISTERED_USER3.accountId = response.accountId;
-  }
-
-  protected HttpResponse<String> makePatchRequest(String subPath, Request request) throws UnirestException
-  {
-    return this.makePostRequest(subPath, request, null);
-  }
-
-  protected HttpResponse<String> makePatchRequest(String subPath, Request request, Map<String, String> headers) throws UnirestException
-  {
-    return Unirest.patch(Config.HOST + subPath).headers(headers).body(GsonSingleton.toJson(request)).asString();
-  }
-
-  protected HttpResponse<String> makePostRequest(String subPath, Request request) throws UnirestException
-  {
-    return this.makePostRequest(subPath, request, null);
-  }
-
-  protected HttpResponse<String> makePostRequest(String subPath, Request request, Map<String, String> headers) throws UnirestException
-  {
-    return Unirest.post(Config.HOST + subPath).headers(headers).body(GsonSingleton.toJson(request)).asString();
-  }
-
-  protected HttpResponse<String> makePostRequest(String subPath, Map<String, String> headers) throws UnirestException
-  {
-    return Unirest.post(Config.HOST + subPath).headers(headers).asString();
-  }
-
-  protected HttpResponse<String> makeGetRequest(String subPath, Map<String, String> headers) throws UnirestException
-  {
-    return Unirest.get(Config.HOST + subPath).headers(headers).asString();
-  }
-
-  protected HttpResponse<String> makeGetRequest(String subPath) throws UnirestException
-  {
-    return this.makeGetRequest(subPath, null);
   }
 
   protected void assertThatResponseEqualsException(HttpResponse<String> response, HttpResponseException e)

@@ -20,7 +20,7 @@ public class LoginTests extends FantasyEsportsTestFixture
   {
     LoginRequest request = new LoginRequest(PRE_REGISTERED_USER1.email, PRE_REGISTERED_USER1.password);
 
-    HttpResponse<String> httpResponse = this.makePostRequest("/account/login", request);
+    HttpResponse<String> httpResponse = makePostRequest("/account/login", request);
 
     assertThat(httpResponse.getStatus()).isEqualTo(200);
     LoginResponse response = GsonSingleton.fromJson(httpResponse.getBody().toString(), LoginResponse.class);
@@ -32,11 +32,11 @@ public class LoginTests extends FantasyEsportsTestFixture
   public void testMandatoryParameters() throws Exception
   {
     LoginRequest request = new LoginRequest(null, PRE_REGISTERED_USER1.password);
-    HttpResponse<String> response = this.makePostRequest("/account/login", request);
+    HttpResponse<String> response = makePostRequest("/account/login", request);
     this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("email"));
 
     request = new LoginRequest(PRE_REGISTERED_USER1.email, null);
-    response = this.makePostRequest("/account/login", request);
+    response = makePostRequest("/account/login", request);
     this.assertThatResponseEqualsException(response, new MissingMandatoryFieldException("password"));
   }
 
@@ -47,7 +47,7 @@ public class LoginTests extends FantasyEsportsTestFixture
     user.password = "otherPassword";
     LoginRequest request = new LoginRequest(user.email, user.password);
 
-    HttpResponse<String> response = this.makePostRequest("/account/login", request);
+    HttpResponse<String> response = makePostRequest("/account/login", request);
 
     this.assertThatResponseEqualsException(response, new WrongPasswordException());
   }
@@ -59,7 +59,7 @@ public class LoginTests extends FantasyEsportsTestFixture
     user.email = "Not@registered.email";
     LoginRequest request = new LoginRequest(user.email, user.password);
 
-    HttpResponse<String> response = this.makePostRequest("/account/login", request);
+    HttpResponse<String> response = makePostRequest("/account/login", request);
 
     this.assertThatResponseEqualsException(response, new EmailNotRegisteredException());
   }
@@ -69,11 +69,11 @@ public class LoginTests extends FantasyEsportsTestFixture
   {
     LoginRequest request = new LoginRequest(PRE_REGISTERED_USER1.email, PRE_REGISTERED_USER1.password);
 
-    HttpResponse<String> httpResponse = this.makePostRequest("/account/login", request);
+    HttpResponse<String> httpResponse = makePostRequest("/account/login", request);
     LoginResponse response = GsonSingleton.fromJson(httpResponse.getBody().toString(), LoginResponse.class);
     assertThat(response.sessionKey).isEqualTo(PRE_REGISTERED_USER1.sessionKey);
 
-    httpResponse = this.makePostRequest("/account/login", request);
+    httpResponse = makePostRequest("/account/login", request);
     response = GsonSingleton.fromJson(httpResponse.getBody().toString(), LoginResponse.class);
     assertThat(response.sessionKey).isEqualTo(PRE_REGISTERED_USER1.sessionKey);
   }

@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import com.github.malow.FantasyEsports.ConvenienceMethods;
 import com.github.malow.FantasyEsports.FantasyEsportsTestFixture;
 import com.github.malow.FantasyEsports.services.HttpResponseException.IllegalValueException;
 import com.github.malow.FantasyEsports.services.HttpResponseException.UnauthorizedException;
@@ -25,11 +24,11 @@ public class ListLeaguesTests extends FantasyEsportsTestFixture
   @Test
   public void testSuccessful() throws Exception
   {
-    ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
-    String league2Id = ConvenienceMethods.createLeague("test124", PRE_REGISTERED_USER2.sessionKey).id; // Other user creates a league that we don't get in response
-    ConvenienceMethods.inviteManager(league2Id, PRE_REGISTERED_USER2.sessionKey, PRE_REGISTERED_USER1.accountId);
+    createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
+    String league2Id = createLeague("test124", PRE_REGISTERED_USER2.sessionKey).id; // Other user creates a league that we don't get in response
+    inviteManager(league2Id, PRE_REGISTERED_USER2.sessionKey, PRE_REGISTERED_USER1.accountId);
 
-    HttpResponse<String> response = this.makeGetRequest("/league", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+    HttpResponse<String> response = makeGetRequest("/league", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     assertThat(response.getStatus()).isEqualTo(200);
     List<ResponseLeague> leagues = GsonSingleton.fromJsonAsList(response.getBody().toString(), ResponseLeague[].class);
@@ -39,9 +38,9 @@ public class ListLeaguesTests extends FantasyEsportsTestFixture
   @Test
   public void testWithBadSession() throws Exception
   {
-    ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
+    createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
 
-    HttpResponse<String> response = this.makeGetRequest("/league", ImmutableMap.of("Session-Key", "BadSessionKey"));
+    HttpResponse<String> response = makeGetRequest("/league", ImmutableMap.of("Session-Key", "BadSessionKey"));
 
     this.assertThatResponseEqualsException(response, new UnauthorizedException());
   }
@@ -49,13 +48,12 @@ public class ListLeaguesTests extends FantasyEsportsTestFixture
   @Test
   public void testFilterByRoleSuccessful() throws Exception
   {
-    ConvenienceMethods.createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
-    String league2Id = ConvenienceMethods.createLeague("test124", PRE_REGISTERED_USER2.sessionKey).id;
-    ConvenienceMethods.inviteManager(league2Id, PRE_REGISTERED_USER2.sessionKey, PRE_REGISTERED_USER1.accountId);
+    createLeague("test123", PRE_REGISTERED_USER1.sessionKey);
+    String league2Id = createLeague("test124", PRE_REGISTERED_USER2.sessionKey).id;
+    inviteManager(league2Id, PRE_REGISTERED_USER2.sessionKey, PRE_REGISTERED_USER1.accountId);
 
-    HttpResponse<String> responseOwner = this.makeGetRequest("/league?role=OWNER", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
-    HttpResponse<String> responseInvited = this.makeGetRequest("/league?role=INVITED",
-        ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+    HttpResponse<String> responseOwner = makeGetRequest("/league?role=OWNER", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
+    HttpResponse<String> responseInvited = makeGetRequest("/league?role=INVITED", ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     assertThat(responseOwner.getStatus()).isEqualTo(200);
     List<ResponseLeague> leagues = GsonSingleton.fromJsonAsList(responseOwner.getBody().toString(), ResponseLeague[].class);
@@ -68,7 +66,7 @@ public class ListLeaguesTests extends FantasyEsportsTestFixture
   @Test
   public void testFilterByBadRole() throws Exception
   {
-    HttpResponse<String> response = this.makeGetRequest("/league?role=BADLEAGUEROLE",
+    HttpResponse<String> response = makeGetRequest("/league?role=BADLEAGUEROLE",
         ImmutableMap.of("Session-Key", PRE_REGISTERED_USER1.sessionKey));
 
     this.assertThatResponseEqualsException(response, new IllegalValueException("role"));
