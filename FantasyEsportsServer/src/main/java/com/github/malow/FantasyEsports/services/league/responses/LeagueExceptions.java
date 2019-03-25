@@ -9,7 +9,9 @@ public class LeagueExceptions
 {
   public static class CreateNameTakenException extends HttpResponseException
   {
-    public CreateNameTakenException()
+	private static final long serialVersionUID = 4636121792292443012L;
+
+	public CreateNameTakenException()
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.LEAGUE_NAME_EXISTS, "Name is already taken");
     }
@@ -17,7 +19,9 @@ public class LeagueExceptions
 
   public static class NoLeagueFoundException extends HttpResponseException
   {
-    public NoLeagueFoundException()
+	private static final long serialVersionUID = 6285286746483259058L;
+
+	public NoLeagueFoundException()
     {
       super(HttpStatus.NOT_FOUND, ErrorCode.LEAGUE_DOES_NOT_EXIST, "No league found");
     }
@@ -25,7 +29,9 @@ public class LeagueExceptions
 
   public static class UserIsAlreadyMemberInLeagueException extends HttpResponseException
   {
-    public UserIsAlreadyMemberInLeagueException()
+	private static final long serialVersionUID = -9037279303944845371L;
+
+	public UserIsAlreadyMemberInLeagueException()
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.USER_ALREADY_MEMBER_IN_LEAGUE, "That user is already a member in this league");
     }
@@ -33,7 +39,9 @@ public class LeagueExceptions
 
   public static class UserIsAlreadyInvitedToLeagueException extends HttpResponseException
   {
-    public UserIsAlreadyInvitedToLeagueException()
+	private static final long serialVersionUID = 6741087373024959870L;
+
+	public UserIsAlreadyInvitedToLeagueException()
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.USER_ALREADY_INVITED_TO_LEAGUE, "That user is already invited to this league");
     }

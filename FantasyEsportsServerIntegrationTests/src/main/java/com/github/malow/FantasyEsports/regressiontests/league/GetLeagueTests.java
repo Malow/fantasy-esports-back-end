@@ -15,8 +15,8 @@ import com.mashape.unirest.http.HttpResponse;
 
 public class GetLeagueTests extends FantasyEsportsTestFixture
 {
-  final ZonedDateTime startDate = ZonedDateTime.now().plusHours(1);
-  final ZonedDateTime endDate = ZonedDateTime.now().plusMonths(1);
+  final ZonedDateTime startDate = ZonedDateTime.now().plusHours(1).withNano(555000000); // Somewhere more than 3 digits of seconds get cut, prolly MongoDB-related.
+  final ZonedDateTime endDate = ZonedDateTime.now().plusMonths(1).withNano(555000000); // Somewhere more than 3 digits of seconds get cut, prolly MongoDB-related.
 
   @Test
   public void testSuccessful() throws Exception

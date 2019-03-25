@@ -9,7 +9,9 @@ public class AccountExceptions
 {
   public static class EmailTakenException extends HttpResponseException
   {
-    public EmailTakenException()
+	private static final long serialVersionUID = -1890528360278830763L;
+
+	public EmailTakenException()
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.EMAIL_EXISTS, "Email is already taken");
     }
@@ -17,7 +19,9 @@ public class AccountExceptions
 
   public static class DisplayNameTakenException extends HttpResponseException
   {
-    public DisplayNameTakenException()
+	private static final long serialVersionUID = -5165348242848222817L;
+
+	public DisplayNameTakenException()
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.DISPLAY_NAME_EXISTS, "DisplayName is already taken");
     }
@@ -25,7 +29,9 @@ public class AccountExceptions
 
   public static class EmailNotRegisteredException extends HttpResponseException
   {
-    public EmailNotRegisteredException()
+	private static final long serialVersionUID = 4393907716743599756L;
+
+	public EmailNotRegisteredException()
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.USER_DOES_NOT_EXIST, "No account for that email exists");
     }
@@ -33,7 +39,9 @@ public class AccountExceptions
 
   public static class WrongPasswordException extends HttpResponseException
   {
-    public WrongPasswordException()
+	private static final long serialVersionUID = 6703087196038731174L;
+
+	public WrongPasswordException()
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.PASSWORD_INCORRECT, "Wrong password");
     }
@@ -41,9 +49,11 @@ public class AccountExceptions
 
   public static class AccountNotFoundException extends HttpResponseException
   {
-    public AccountNotFoundException()
+	private static final long serialVersionUID = 5998159687181611336L;
+
+	public AccountNotFoundException()
     {
-      super(HttpStatus.BAD_REQUEST, ErrorCode.ACCOUNT_NOT_FOUND, "Couldn't find an account with that id");
+      super(HttpStatus.NOT_FOUND, ErrorCode.ACCOUNT_NOT_FOUND, "Couldn't find an account with that id");
     }
   }
 }

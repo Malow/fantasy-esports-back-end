@@ -9,9 +9,11 @@ public class ManagerExceptions
 {
   public static class NoManagerFoundException extends HttpResponseException
   {
-    public NoManagerFoundException()
+	private static final long serialVersionUID = -6466311795373630862L;
+
+	public NoManagerFoundException()
     {
-      super(HttpStatus.NOT_FOUND, ErrorCode.LEAGUE_DOES_NOT_EXIST, "No league found");
+      super(HttpStatus.NOT_FOUND, ErrorCode.MANAGER_DOES_NOT_EXIST, "No manager found");
     }
   }
 }

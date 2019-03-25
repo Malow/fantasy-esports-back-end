@@ -6,7 +6,11 @@ import com.github.malow.malowlib.GsonSingleton;
 
 public class HttpResponseException extends Exception
 {
-  private HttpStatus httpStatus;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1124925468779522861L;
+private HttpStatus httpStatus;
   private ErrorCode errorCode;
   private String errorMessage;
 
@@ -53,7 +57,9 @@ public class HttpResponseException extends Exception
 
   public static class BadJsonRequestException extends HttpResponseException
   {
-    public BadJsonRequestException()
+	private static final long serialVersionUID = -5483468344860823984L;
+
+	public BadJsonRequestException()
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.BADLY_FORMED_JSON, "Badly formed json");
     }
@@ -61,7 +67,9 @@ public class HttpResponseException extends Exception
 
   public static class IllegalValueException extends HttpResponseException
   {
-    public IllegalValueException(String badField)
+	private static final long serialVersionUID = -2932315467495447312L;
+
+	public IllegalValueException(String badField)
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.ILLEGAL_VALUE, "Illegal value for field: " + badField);
     }
@@ -69,7 +77,9 @@ public class HttpResponseException extends Exception
 
   public static class MissingMandatoryFieldException extends HttpResponseException
   {
-    public MissingMandatoryFieldException(String missingField)
+	private static final long serialVersionUID = -5189054125455246913L;
+
+	public MissingMandatoryFieldException(String missingField)
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.MISSING_MANDATORY_FIELD, "Missing mandatory field: " + missingField);
     }
@@ -77,7 +87,9 @@ public class HttpResponseException extends Exception
 
   public static class UnauthorizedException extends HttpResponseException
   {
-    public UnauthorizedException()
+	private static final long serialVersionUID = -4076938813445623845L;
+
+	public UnauthorizedException()
     {
       super(HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHORIZED, "You're missing authorization");
     }
@@ -85,7 +97,9 @@ public class HttpResponseException extends Exception
 
   public static class ForbiddenException extends HttpResponseException
   {
-    public ForbiddenException()
+	private static final long serialVersionUID = -5762294637834792418L;
+
+	public ForbiddenException()
     {
       super(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "You do not have permission to do that");
     }
@@ -93,7 +107,9 @@ public class HttpResponseException extends Exception
 
   public static class NoChangeMadeException extends HttpResponseException
   {
-    public NoChangeMadeException()
+	private static final long serialVersionUID = 17549103586046369L;
+
+	public NoChangeMadeException()
     {
       super(HttpStatus.BAD_REQUEST, ErrorCode.NO_CHANGE_MADE, "No change was made");
     }
