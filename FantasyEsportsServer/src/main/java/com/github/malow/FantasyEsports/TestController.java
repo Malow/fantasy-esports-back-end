@@ -1,5 +1,7 @@
 package com.github.malow.FantasyEsports;
 
+import java.time.ZonedDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -11,11 +13,20 @@ import com.github.malow.FantasyEsports.config.DeployMode;
 import com.github.malow.FantasyEsports.config.FantasyEsportsServerConfig;
 import com.github.malow.FantasyEsports.services.Controller;
 import com.github.malow.FantasyEsports.services.HttpResponseException;
+import com.github.malow.FantasyEsports.services.account.Account;
 import com.github.malow.FantasyEsports.services.account.AccountRepository;
 import com.github.malow.FantasyEsports.services.account.AccountService;
 import com.github.malow.FantasyEsports.services.account.requests.RegisterRequest;
+import com.github.malow.FantasyEsports.services.account.responses.LoginResponse;
+import com.github.malow.FantasyEsports.services.league.League;
 import com.github.malow.FantasyEsports.services.league.LeagueRepository;
+import com.github.malow.FantasyEsports.services.league.LeagueRole;
+import com.github.malow.FantasyEsports.services.league.LeagueService;
+import com.github.malow.FantasyEsports.services.league.requests.CreateLeagueRequest;
+import com.github.malow.FantasyEsports.services.manager.Manager;
 import com.github.malow.FantasyEsports.services.manager.ManagerRepository;
+import com.github.malow.FantasyEsports.services.manager.ManagerService;
+import com.github.malow.FantasyEsports.services.manager.requests.ModifyManagerRequest;
 import com.github.malow.malowlib.MaloWLogger;
 
 @ApiDoc("Contains various methods used during testing that are not available in PRODUCTION-mode.")
@@ -32,6 +43,10 @@ public class TestController extends Controller
 
   @Autowired
   private AccountService accountService;
+  @Autowired
+  private LeagueService leagueService;
+  @Autowired
+  private ManagerService managerService;
 
   @ApiDoc("Resets the database used, and pre-seeds it with some data.")
   @GetMapping(value = { "/resetdatabase" })
@@ -51,11 +66,32 @@ public class TestController extends Controller
     // Pre-seed
     try
     {
-      for (int i = 1; i < 6; i++)
-      {
-        RegisterRequest registerRequest = new RegisterRequest("test" + i + "@gmail.com", "test" + i, "test" + i);
-        this.accountService.register(registerRequest);
-      }
+      RegisterRequest registerRequest = new RegisterRequest("owner@gmail.com", "Tony_Stark", "Asdf1234");
+      LoginResponse ownerLoginResponse = this.accountService.register(registerRequest);
+      registerRequest = new RegisterRequest("member@gmail.com", "Chris_Pratt", "Asdf1234");
+      LoginResponse memberLoginResponse = this.accountService.register(registerRequest);
+      registerRequest = new RegisterRequest("invited@gmail.com", "Bruce_Banner", "Asdf1234");
+      LoginResponse invitedLoginResponse = this.accountService.register(registerRequest);
+      registerRequest = new RegisterRequest("not_invited@gmail.com", "Peter_Parker", "Asdf1234");
+      LoginResponse notInvitedLoginResponse = this.accountService.register(registerRequest);
+
+      Account ownerAccount = this.accountService.authorize(ownerLoginResponse.sessionKey);
+      Account memberAccount = this.accountService.authorize(memberLoginResponse.sessionKey);
+      Account invitedAccount = this.accountService.authorize(invitedLoginResponse.sessionKey);
+      this.accountService.authorize(notInvitedLoginResponse.sessionKey);
+
+      CreateLeagueRequest createLeagueRequest = new CreateLeagueRequest("The One League", ZonedDateTime.now().plusDays(1),
+          ZonedDateTime.now().plusMonths(1).plusDays(1));
+      League league = this.leagueService.createLeague(createLeagueRequest, ownerAccount);
+
+      this.leagueService.inviteManager(memberAccount, league.getId(), ownerAccount);
+      Manager memberManager = this.leagueService.getManagersForLeague(league).stream().filter(m -> m.getLeagueRole().equals(LeagueRole.INVITED))
+          .findFirst()
+          .get();
+      ModifyManagerRequest modifyManagerRequest = new ModifyManagerRequest(LeagueRole.MEMBER);
+      this.managerService.modifyManager(memberManager.getId(), modifyManagerRequest, memberAccount);
+
+      this.leagueService.inviteManager(invitedAccount, league.getId(), ownerAccount);
     }
     catch (HttpResponseException e)
     {
